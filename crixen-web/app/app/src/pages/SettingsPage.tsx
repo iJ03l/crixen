@@ -1,0 +1,131 @@
+import { useState } from "react";
+import { Check } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { api } from "@/services/api";
+
+const PLANS = [
+    {
+        id: "starter",
+        name: "Starter",
+        price: "$0",
+        period: "/mo",
+        features: ["1 Project", "50 Generations/day", "Local-First Memory"],
+        priceId: null
+    },
+    {
+        id: "pro",
+        name: "Pro",
+        price: "$20",
+        period: "/mo",
+        features: ["3 Projects", "1500 Generations/day", "Priority Support"],
+        priceId: "price_pro_test" // In prod, use env var
+    },
+    {
+        id: "agency",
+        name: "Agency",
+        price: "$200",
+        period: "/mo",
+        features: ["Unlimited Projects", "Unlimited Generations", "Dedicated Account Manager"],
+        priceId: "price_agency_test"
+    }
+];
+
+export default function SettingsPage() {
+    const { user } = useAuthStore();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleUpgrade = async (plan: any) => {
+        if (!plan.priceId || !user) return;
+        if (plan.id === user.tier) return; // Already on plan
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await api.billing.createCheckoutSession(plan.priceId);
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error("Failed to start checkout");
+            }
+        } catch (err: any) {
+            setError(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!user) return null;
+
+    return (
+        <div className="space-y-8 max-w-5xl mx-auto">
+            <div className="flex flex-col gap-2">
+                <h2 className="font-heading font-bold text-3xl text-dark-text">Settings & Billing</h2>
+                <p className="text-dark-muted">Manage your subscription, usage limits, and account preferences.</p>
+            </div>
+
+            {error && (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                    {error}
+                </div>
+            )}
+
+            <div className="grid gap-6 lg:grid-cols-3">
+                {PLANS.map((plan) => {
+                    const isCurrent = user.tier === plan.id;
+                    return (
+                        <div
+                            key={plan.id}
+                            className={`flex flex-col p-6 rounded-2xl bg-white/[0.03] border transition-all ${isCurrent
+                                    ? 'border-dark-text/30 ring-1 ring-dark-text/30 bg-white/[0.05]'
+                                    : 'border-white/5 hover:border-white/10'
+                                }`}
+                        >
+                            <div className="mb-4">
+                                <h3 className="font-bold text-lg text-dark-text">{plan.name}</h3>
+                                <div className="mt-2 flex items-baseline gap-1">
+                                    <span className="text-3xl font-bold text-dark-text">{plan.price}</span>
+                                    <span className="text-sm text-dark-muted">{plan.period}</span>
+                                </div>
+                            </div>
+
+                            <ul className="flex-1 space-y-3 text-sm text-dark-muted mb-8">
+                                {plan.features.map((feature, i) => (
+                                    <li key={i} className="flex items-center gap-2">
+                                        <Check size={16} className="text-green-400 shrink-0" />
+                                        <span>{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <button
+                                className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${isCurrent
+                                        ? 'bg-white/10 text-dark-muted cursor-default'
+                                        : 'bg-dark-text text-dark-bg hover:bg-dark-silver'
+                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                disabled={isCurrent || loading}
+                                onClick={() => handleUpgrade(plan)}
+                            >
+                                {loading && !isCurrent ? 'Processing...' : (
+                                    isCurrent ? "Current Plan" : (plan.priceId ? "Upgrade" : "Downgrade")
+                                )}
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Account Info Section */}
+            <div className="pt-8 border-t border-white/5">
+                <h3 className="font-heading font-bold text-xl text-dark-text mb-4">Account Information</h3>
+                <div className="grid gap-4 max-w-xl">
+                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                        <label className="text-xs uppercase tracking-wider text-dark-muted block mb-1">Email Address</label>
+                        <p className="text-dark-text">{user.email}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
