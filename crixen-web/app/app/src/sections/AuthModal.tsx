@@ -11,6 +11,7 @@ const AuthModal = () => {
     flow: 'auth-code',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,6 +20,27 @@ const AuthModal = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
+
+    // Password Validation on Signup
+    if (!isLogin) {
+      const pwd = formData.password;
+      if (pwd.length < 8) {
+        setValidationError("Password must be at least 8 characters");
+        return;
+      }
+      if (pwd.length > 72) {
+        setValidationError("Password is too long");
+        return;
+      }
+      // Regex: At least one upper, one lower, one number, one special
+      const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
+      if (!strongPasswordRegex.test(pwd)) {
+        setValidationError("Password must include uppercase, lowercase, number, and special character");
+        return;
+      }
+    }
+
     if (authMode === 'login') {
       await login(formData.email, formData.password);
     } else {
@@ -58,9 +80,9 @@ const AuthModal = () => {
           </p>
         </div>
 
-        {error && (
+        {(error || validationError) && (
           <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
-            {error}
+            {error || validationError}
           </div>
         )}
 

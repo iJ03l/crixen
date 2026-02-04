@@ -20,6 +20,22 @@ const generateToken = (user) => {
 router.post('/register', async (req, res) => {
     const { email, password } = req.body;
 
+    // Validate password
+    if (!password || password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+    if (password.length > 72) {
+        return res.status(400).json({ error: 'Password is too long (max 72 characters)' });
+    }
+
+    // Regex: At least one upper, one lower, one number, one special
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
+    if (!strongPasswordRegex.test(password)) {
+        return res.status(400).json({
+            error: 'Password must include uppercase, lowercase, number, and special character'
+        });
+    }
+
     try {
         // Check if user exists
         const userCheck = await db.query('SELECT * FROM users WHERE email = $1', [email]);
