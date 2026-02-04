@@ -15,20 +15,20 @@ const PLANS = [
     {
         id: "pro",
         name: "Pro",
-        price: "$20",
+        price: "$10",
         period: "/mo",
         features: ["3 Projects", "1500 Generations/day", "Priority Support"],
         itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5",
-        amount: "20.00"
+        amount: "10.00"
     },
     {
         id: "agency",
         name: "Agency",
-        price: "$200",
+        price: "$100",
         period: "/mo",
         features: ["Unlimited Projects", "Unlimited Generations", "Dedicated Account Manager"],
         itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5", // TODO: Get Agency Item ID
-        amount: "200.00"
+        amount: "100.00"
     }
 ];
 

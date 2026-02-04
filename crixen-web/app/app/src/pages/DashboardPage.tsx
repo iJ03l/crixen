@@ -23,7 +23,24 @@ export default function DashboardPage() {
     }, [user]);
 
     if (!user) return null;
-    if (loading) return <div className="p-8 text-dark-muted">Loading dashboard...</div>;
+    if (loading) {
+        return (
+            <div>
+                <h2 className="font-heading font-semibold text-xl text-dark-text mb-4">
+                    Overview
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 mb-6">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="stat-card p-3 lg:p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] animate-pulse">
+                            <div className="h-8 w-16 bg-white/10 rounded mb-2"></div>
+                            <div className="h-4 w-24 bg-white/10 rounded mb-1"></div>
+                            <div className="h-3 w-12 bg-white/5 rounded"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     // Use fetched stats or fallback to 0/empty
     const displayStats = [

@@ -15,7 +15,17 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(helmet());
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://crixen-web.vercel.app', 'https://www.crixen.xyz', 'https://crixen.xyz'],
+    origin: function (origin, callback) {
+        const allowedOrigins = ['http://localhost:5173', 'https://crixen-web.vercel.app', 'https://www.crixen.xyz', 'https://crixen.xyz'];
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('chrome-extension://')) {
+            callback(null, true);
+        } else {
+            console.log('Blocked by CORS:', origin); // Debugging
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(compression());

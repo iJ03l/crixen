@@ -50,7 +50,7 @@ const Pricing = () => {
               toggleActions: 'play none none reverse',
               onEnter: () => {
                 // Animate price numbers
-                const targets = [0, 20, 200];
+                const targets = [0, 10, 100];
                 targets.forEach((target, i) => {
                   gsap.to(
                     { value: 0 },
@@ -97,7 +97,7 @@ const Pricing = () => {
     {
       name: 'Pro',
       price: animatedValues[1],
-      priceLabel: '$20/mo',
+      priceLabel: '$10/mo',
       description: 'Great for creators with multiple personas',
       features: [
         '3 Projects',
@@ -112,7 +112,7 @@ const Pricing = () => {
     {
       name: 'Agency',
       price: animatedValues[2],
-      priceLabel: '$200/mo',
+      priceLabel: '$100/mo',
       description: 'For social media managers & scaling teams',
       features: [
         'Unlimited Projects',
