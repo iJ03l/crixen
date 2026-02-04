@@ -78,11 +78,23 @@ router.post('/login', async (req, res) => {
 
 // POST /api/v1/auth/google
 router.post('/google', async (req, res) => {
-    const { token } = req.body; // Token from frontend (Identity Token)
+    const { token, code } = req.body;
 
     try {
+        let idToken = token;
+
+        // If auth code provided, exchange it for tokens
+        if (code) {
+            const { tokens } = await googleClient.getToken(code);
+            idToken = tokens.id_token;
+        }
+
+        if (!idToken) {
+            return res.status(400).json({ error: 'No token provided' });
+        }
+
         const ticket = await googleClient.verifyIdToken({
-            idToken: token,
+            idToken: idToken,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();

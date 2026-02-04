@@ -15,6 +15,7 @@ interface AuthState {
   authMode: 'login' | 'signup';
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
+  googleLogin: (code: string) => Promise<void>;
   logout: () => void;
   openAuthModal: (mode: 'login' | 'signup') => void;
   closeAuthModal: () => void;
@@ -80,6 +81,32 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Signup failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      set({ token: data.token, user: data.user, isAuthModalOpen: false });
+    } catch (error: any) {
+      set({ error: error.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  googleLogin: async (code) => {
+    set({ isLoading: true, error: null });
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${apiUrl}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Google login failed');
       }
 
       const data = await response.json();

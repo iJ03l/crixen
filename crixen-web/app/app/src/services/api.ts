@@ -21,6 +21,12 @@ export const api = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(credentials)
         }).then(res => res.json()),
+
+        google: (data: { code?: string, token?: string }) => fetch(`${API_URL}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(res => res.json()),
     },
 
     ai: {

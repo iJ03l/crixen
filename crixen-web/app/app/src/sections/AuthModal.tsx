@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const AuthModal = () => {
-  const { authMode, closeAuthModal, toggleAuthMode, login, signup, isLoading, error } = useAuthStore();
+  const { authMode, closeAuthModal, toggleAuthMode, login, signup, googleLogin, isLoading, error } = useAuthStore();
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: (codeResponse) => googleLogin(codeResponse.code),
+    flow: 'auth-code',
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -183,7 +189,7 @@ const AuthModal = () => {
 
         {/* Social buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <button className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition-colors">
+          <button type="button" onClick={() => handleGoogleLogin()} className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition-colors">
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
