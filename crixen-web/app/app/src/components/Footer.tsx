@@ -42,7 +42,6 @@ const Footer = () => {
                         </h4>
                         <ul className="space-y-2.5">
                             {[
-                                { label: 'Features', path: '/#features' },
                                 { label: 'Pricing', path: '/#pricing' },
                                 { label: 'Changelog', path: '/changelog' },
                             ].map((item) => (

@@ -1,4 +1,4 @@
-import { ArrowRight, Send, MessageSquare, Instagram, Twitter, Linkedin, FileText, PlusCircle } from 'lucide-react';
+import { ArrowRight, Send, MessageSquare, Instagram, Twitter, FileText, PlusCircle } from 'lucide-react';
 
 interface FeatureProps {
     id: string;
@@ -13,9 +13,10 @@ interface FeatureProps {
 interface CombinedFeatureSectionProps {
     feature1: FeatureProps;
     feature2?: FeatureProps;
+    feature3?: FeatureProps;
 }
 
-const CombinedFeatureSection = ({ feature1, feature2 }: CombinedFeatureSectionProps) => {
+const CombinedFeatureSection = ({ feature1, feature2, feature3 }: CombinedFeatureSectionProps) => {
 
     const renderUICard = (type: string) => {
         switch (type) {
@@ -194,6 +195,18 @@ const CombinedFeatureSection = ({ feature1, feature2 }: CombinedFeatureSectionPr
         </div>
     );
 
+    const getGridClasses = () => {
+        if (feature3) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'; // 3 cols
+        if (feature2) return 'grid-cols-1 md:grid-cols-2'; // 2 cols
+        return 'grid-cols-1'; // 1 col
+    };
+
+    const getMaxWidth = () => {
+        if (feature3) return 'max-w-7xl lg:max-w-[90vw] xl:max-w-7xl';
+        if (feature2) return 'max-w-7xl';
+        return 'max-w-4xl';
+    };
+
     return (
         <section className="relative w-full py-20 px-6 lg:px-8 border-t border-white/5 bg-dark-bg">
             {/* Shared Background Image */}
@@ -208,11 +221,11 @@ const CombinedFeatureSection = ({ feature1, feature2 }: CombinedFeatureSectionPr
                 <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-transparent to-dark-bg" />
             </div>
 
-            <div className={`relative z-10 mx-auto ${feature2 ? 'max-w-7xl' : 'max-w-4xl'}`}>
-                {/* Grid Layout: 2 Columns if feature2 exists, else 1 Column centered */}
-                <div className={`grid gap-8 lg:gap-12 ${feature2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+            <div className={`relative z-10 mx-auto ${getMaxWidth()}`}>
+                <div className={`grid gap-12 lg:gap-20 ${getGridClasses()}`}>
                     <FeatureBlock feature={feature1} />
                     {feature2 && <FeatureBlock feature={feature2} />}
+                    {feature3 && <FeatureBlock feature={feature3} />}
                 </div>
             </div>
         </section>
