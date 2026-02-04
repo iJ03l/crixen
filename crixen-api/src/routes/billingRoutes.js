@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/db');
+const requireAuth = require('../middleware/authMiddleware');
 
 // Helper to validate webhook signature (if HOT Pay provides one, otherwise rely on memo/logic)
 // For now, assuming standard REST webhook. 
 
 // POST /api/v1/billing/create-hot-order
-router.post('/create-hot-order', async (req, res) => {
+router.post('/create-hot-order', requireAuth, async (req, res) => {
     // 1. Get user from request (assuming auth middleware populates req.user)
     // NOTE: If this route is public, we need another way to identify user. 
     // Assuming protected route or email is passed. 

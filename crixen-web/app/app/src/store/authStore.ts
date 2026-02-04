@@ -13,9 +13,9 @@ interface AuthState {
   error: string | null;
   isAuthModalOpen: boolean;
   authMode: 'login' | 'signup';
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
-  googleLogin: (code: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string) => Promise<boolean>;
+  googleLogin: (code: string) => Promise<boolean>;
   logout: () => void;
   openAuthModal: (mode: 'login' | 'signup') => void;
   closeAuthModal: () => void;
@@ -61,8 +61,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
+      return true;
     } catch (error: any) {
       set({ error: error.message });
+      return false;
     } finally {
       set({ isLoading: false });
     }
@@ -87,8 +89,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
+      return true;
     } catch (error: any) {
       set({ error: error.message });
+      return false;
     } finally {
       set({ isLoading: false });
     }
@@ -113,8 +117,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
+      return true;
     } catch (error: any) {
       set({ error: error.message });
+      return false;
     } finally {
       set({ isLoading: false });
     }

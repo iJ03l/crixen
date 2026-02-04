@@ -39,7 +39,8 @@ export default function SettingsPage() {
 
     const handleUpgrade = async (plan: any) => {
         if (!plan.itemId || !user) return;
-        if (plan.id === user.tier) return; // Already on plan
+        const currentTier = (user.tier as string) === 'free' ? 'starter' : user.tier;
+        if (plan.id === currentTier) return; // Already on plan
 
         setLoading(true);
         setError(null);
@@ -75,7 +76,8 @@ export default function SettingsPage() {
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {PLANS.map((plan) => {
-                    const isCurrent = user.tier === plan.id;
+                    const currentTier = (user.tier as string) === 'free' ? 'starter' : user.tier;
+                    const isCurrent = currentTier === plan.id;
                     return (
                         <div
                             key={plan.id}

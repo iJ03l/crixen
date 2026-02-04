@@ -23,7 +23,8 @@ router.post('/generate', async (req, res) => {
         const currentUsage = parseInt(usageRes.rows[0].count);
 
         const LIMITS = { starter: 50, pro: 1500, agency: Infinity };
-        const limit = LIMITS[user.tier] || 50;
+        const tier = user.tier === 'free' ? 'starter' : user.tier;
+        const limit = LIMITS[tier] || 50;
 
         if (currentUsage >= limit) {
             return res.status(403).json({ error: 'Daily quota exceeded' });
@@ -73,8 +74,9 @@ router.post('/generate', async (req, res) => {
 router.get('/stats', async (req, res) => {
     const user = req.user;
     const limits = { starter: 50, pro: 1500, agency: 999999 };
-    const limit = limits[user.tier] || 50;
-    const projectLimit = user.tier === 'starter' ? 1 : (user.tier === 'pro' ? 3 : 999);
+    const tier = user.tier === 'free' ? 'starter' : user.tier;
+    const limit = limits[tier] || 50;
+    const projectLimit = tier === 'starter' ? 1 : (tier === 'pro' ? 3 : 999);
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);

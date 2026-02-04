@@ -2,12 +2,17 @@ import { useState } from 'react';
 import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
 
 const AuthModal = () => {
   const { authMode, closeAuthModal, toggleAuthMode, login, signup, googleLogin, isLoading, error } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleGoogleLogin = useGoogleLogin({
-    onSuccess: (codeResponse) => googleLogin(codeResponse.code),
+    onSuccess: async (codeResponse) => {
+      const success = await googleLogin(codeResponse.code);
+      if (success) navigate('/dashboard');
+    },
     flow: 'auth-code',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -41,10 +46,15 @@ const AuthModal = () => {
       }
     }
 
+    let success = false;
     if (authMode === 'login') {
-      await login(formData.email, formData.password);
+      success = await login(formData.email, formData.password);
     } else {
-      await signup(formData.email, formData.password);
+      success = await signup(formData.email, formData.password);
+    }
+
+    if (success) {
+      navigate('/dashboard');
     }
   };
 
