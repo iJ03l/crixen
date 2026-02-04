@@ -101,7 +101,7 @@ const Pricing = () => {
       description: 'Great for creators with multiple personas',
       features: [
         '3 Projects',
-        '1500 Generations / day',
+        '150 Generations / day',
         'Advanced strategy tools',
         'Priority support',
         'Local-first speed',

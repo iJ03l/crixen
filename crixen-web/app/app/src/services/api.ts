@@ -53,6 +53,23 @@ export const api = {
         }
     },
 
+    projects: {
+        list: async () => {
+            const res = await fetch(`${API_URL}/projects`, { headers: getHeaders() });
+            if (!res.ok) throw new Error('Failed to fetch projects');
+            return res.json();
+        },
+        create: async (name: string) => {
+            const res = await fetch(`${API_URL}/projects`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ name })
+            });
+            if (!res.ok) throw new Error('Failed to create project');
+            return res.json();
+        }
+    },
+
     billing: {
         createHotOrder: async (itemId?: string, amount?: string) => {
             const res = await fetch(`${API_URL}/billing/create-hot-order`, {

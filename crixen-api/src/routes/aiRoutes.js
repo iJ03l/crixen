@@ -22,7 +22,7 @@ router.post('/generate', async (req, res) => {
         );
         const currentUsage = parseInt(usageRes.rows[0].count);
 
-        const LIMITS = { starter: 50, pro: 1500, agency: Infinity };
+        const LIMITS = { starter: 10, pro: 150, agency: Infinity };
         const tier = user.tier === 'free' ? 'starter' : user.tier;
         const limit = LIMITS[tier] || 50;
 
@@ -77,7 +77,7 @@ router.post('/generate', async (req, res) => {
 // GET /api/v1/ai/stats
 router.get('/stats', async (req, res) => {
     const user = req.user;
-    const limits = { starter: 50, pro: 1500, agency: 999999 };
+    const limits = { starter: 10, pro: 150, agency: 999999 };
     const tier = user.tier === 'free' ? 'starter' : user.tier;
     const limit = limits[tier] || 50;
     const projectLimit = tier === 'starter' ? 1 : (tier === 'pro' ? 3 : 999);
@@ -98,11 +98,18 @@ router.get('/stats', async (req, res) => {
         );
         const projectCount = parseInt(projectRes.rows[0].count);
 
+        const latestProjectRes = await db.query(
+            'SELECT name FROM projects WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+            [user.id]
+        );
+        const latestProjectName = latestProjectRes.rows[0]?.name || null;
+
         res.json({
             generatedCount,
             limit,
             projects: projectCount,
-            projectLimit
+            projectLimit,
+            latestProjectName
         });
     } catch (err) {
         console.error(err);

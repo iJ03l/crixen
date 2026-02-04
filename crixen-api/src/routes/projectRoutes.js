@@ -58,4 +58,29 @@ router.post('/', async (req, res) => {
     }
 });
 
+// PUT /api/v1/projects/:id
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const user = req.user;
+
+    if (!name) return res.status(400).json({ error: 'Project name is required' });
+
+    try {
+        const result = await db.query(
+            'UPDATE projects SET name = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+            [name, id, user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to update project' });
+    }
+});
+
 module.exports = router;

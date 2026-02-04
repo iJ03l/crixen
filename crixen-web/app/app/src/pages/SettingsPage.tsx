@@ -9,7 +9,13 @@ const PLANS = [
         name: "Starter",
         price: "$0",
         period: "/mo",
-        features: ["1 Project", "50 Generations/day", "Local-First Memory"],
+        description: "Ideal for solopreneurs managing one brand",
+        features: [
+            "1 Project / Memory Context",
+            "Basic generation limits",
+            "Standard tone settings",
+            "Community support"
+        ],
         itemId: null
     },
     {
@@ -17,7 +23,14 @@ const PLANS = [
         name: "Pro",
         price: "$10",
         period: "/mo",
-        features: ["3 Projects", "1500 Generations/day", "Priority Support"],
+        description: "Great for creators with multiple personas",
+        features: [
+            "3 Projects",
+            "150 Generations / day",
+            "Advanced strategy tools",
+            "Priority support",
+            "Local-first speed"
+        ],
         itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5",
         amount: "10.00"
     },
@@ -26,7 +39,14 @@ const PLANS = [
         name: "Agency",
         price: "$100",
         period: "/mo",
-        features: ["Unlimited Projects", "Unlimited Generations", "Dedicated Account Manager"],
+        description: "For social media managers & scaling teams",
+        features: [
+            "Unlimited Projects",
+            "Unlimited Generations",
+            "Isolated memory per project",
+            "Team collaboration",
+            "Dedicated account manager"
+        ],
         itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5", // TODO: Get Agency Item ID
         amount: "100.00"
     }
@@ -92,6 +112,7 @@ export default function SettingsPage() {
                                     <span className="text-3xl font-bold text-dark-text">{plan.price}</span>
                                     <span className="text-sm text-dark-muted">{plan.period}</span>
                                 </div>
+                                <p className="text-sm text-dark-muted mt-2">{plan.description}</p>
                             </div>
 
                             <ul className="flex-1 space-y-3 text-sm text-dark-muted mb-8">
