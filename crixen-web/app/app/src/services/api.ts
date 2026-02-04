@@ -48,13 +48,13 @@ export const api = {
     },
 
     billing: {
-        createCheckoutSession: async (priceId: string) => {
-            const res = await fetch(`${API_URL}/billing/create-checkout-session`, {
+        createHotOrder: async (itemId?: string, amount?: string) => {
+            const res = await fetch(`${API_URL}/billing/create-hot-order`, {
                 method: 'POST',
                 headers: getHeaders(),
-                body: JSON.stringify({ priceId })
+                body: JSON.stringify({ itemId, amount })
             });
-            if (!res.ok) throw new Error('Failed to create checkout session');
+            if (!res.ok) throw new Error('Failed to create order');
             return res.json();
         }
     }

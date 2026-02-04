@@ -1,75 +1,111 @@
 const express = require('express');
 const router = express.Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-// const db = require('../config/db'); // In real app
+const { v4: uuidv4 } = require('uuid');
+const db = require('../config/db');
 
-// POST /api/v1/billing/webhook
-// Stripe calls this when a payment succeeds
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    letevent;
+// Helper to validate webhook signature (if HOT Pay provides one, otherwise rely on memo/logic)
+// For now, assuming standard REST webhook. 
+
+// POST /api/v1/billing/create-hot-order
+router.post('/create-hot-order', async (req, res) => {
+    // 1. Get user from request (assuming auth middleware populates req.user)
+    // NOTE: If this route is public, we need another way to identify user. 
+    // Assuming protected route or email is passed. 
+    // For now, let's assume req.user.id exists or we pass userId.
+    // If not, for the MVP, we might pass userId in body or rely on auth middleware.
+
+    // Check if auth middleware is used in index.js for this route. 
+    // If not, we'll assume a dummy user for now if req.user is missing, OR accept email.
+
+    const userId = req.user?.id || req.body.userId;
+    const itemId = req.body.itemId || 'ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5';
+    const amount = req.body.amount || '4.99'; // Default or dynamic
+
+    if (!userId) {
+        return res.status(401).json({ error: 'User ID required' });
+    }
 
     try {
-        // Verify webhook signature (mocked/skipped if no secret provided for dev)
-        if (process.env.STRIPE_WEBHOOK_SECRET) {
-            event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        } else {
-            event = JSON.parse(req.body.toString());
-        }
-    } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+        // 2. Generate UUID memo
+        const memo = uuidv4();
+
+        // 3. Create Order in DB
+        const insertOrderQuery = `
+            INSERT INTO orders (user_id, memo, amount, status, item_id)
+            VALUES ($1, $2, $3, 'pending', $4)
+            RETURNING id
+        `;
+        await db.query(insertOrderQuery, [userId, memo, amount, itemId]);
+
+        // 4. Construct HOT Pay URL
+        // https://pay.hot-labs.org/payment?item_id=...&amount=...&memo=...&webhook_url=...
+        const webhookUrl = process.env.WEBHOOK_URL || 'http://localhost:3000/api/v1/billing/webhook';
+
+        // Ensure webhookUrl is URL encoded
+        const redirectUrl = `https://pay.hot-labs.org/payment?item_id=${itemId}&amount=${amount}&memo=${memo}&webhook_url=${encodeURIComponent(webhookUrl)}`;
+
+        res.json({ url: redirectUrl });
+
+    } catch (error) {
+        console.error('Error creating HOT order:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    // Handle events
-    switch (event.type) {
-        case 'checkout.session.completed':
-            const session = event.data.object;
-            const customerEmail = session.customer_details.email;
-            console.log(`[Billing] Payment success for ${customerEmail}. Upgrading to PRO.`);
-
-            // TODO: Update user in DB
-            // await db.users.update({ tier: 'pro' }, { where: { email: customerEmail } });
-            break;
-
-        case 'customer.subscription.deleted':
-            const sub = event.data.object;
-            console.log(`[Billing] Subscription canceled. Downgrading to STARTER.`);
-            // TODO: Downgrade user
-            break;
-
-        default:
-            console.log(`[Billing] Unhandled event type ${event.type}`);
-    }
-
-    res.json({ received: true });
 });
 
-// POST /api/v1/billing/create-checkout-session
-router.post('/create-checkout-session', async (req, res) => {
-    // For MVP Demo, we return a mock URL or a real Stripe Session URL
-    const { priceId } = req.body;
+// POST /api/v1/billing/webhook
+// HOT Pay calls this when payment succeeds
+router.post('/webhook', express.json(), async (req, res) => {
+    console.log('[Webhook] Received payload:', req.body);
 
-    // Mock for verification without keys
-    if (!process.env.STRIPE_SECRET_KEY) {
-        return res.json({ url: 'http://localhost:3000/mock-payment-success' });
+    const { status, memo } = req.body;
+
+    // 1. Validate status
+    if (status !== 'SUCCESS') {
+        console.log(`[Webhook] Payment not successful: ${status}`);
+        return res.json({ received: true });
+    }
+
+    if (!memo) {
+        return res.status(400).json({ error: 'Missing memo' });
     }
 
     try {
-        const session = await stripe.checkout.sessions.create({
-            line_items: [
-                {
-                    price: priceId, // 'price_...'
-                    quantity: 1,
-                },
-            ],
-            mode: 'subscription',
-            success_url: 'http://localhost:3001/dashboard?success=true',
-            cancel_url: 'http://localhost:3001/dashboard?canceled=true',
-        });
-        res.json({ url: session.url });
+        // 2. Find Order by Memo
+        const orderResult = await db.query('SELECT * FROM orders WHERE memo = $1', [memo]);
+
+        if (orderResult.rows.length === 0) {
+            console.error(`[Webhook] Order not found for memo: ${memo}`);
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        const order = orderResult.rows[0];
+
+        // 3. Idempotency Check
+        if (order.status === 'paid') {
+            console.log(`[Webhook] Order ${order.id} already paid.`);
+            return res.json({ received: true });
+        }
+
+        // 4. Mark Order as Paid
+        await db.query('UPDATE orders SET status = $1 WHERE id = $2', ['paid', order.id]);
+
+        // 5. Issue Ticket / Update User Tier
+        // Grant user 'pro' tier
+        await db.query('UPDATE users SET tier = $1 WHERE id = $2', ['pro', order.user_id]);
+
+        // Create Ticket Record
+        await db.query(`
+            INSERT INTO tickets (user_id, order_id, ticket_data)
+            VALUES ($1, $2, $3)
+        `, [order.user_id, order.id, JSON.stringify({ issued_at: new Date(), description: 'Pro Upgrade' })]);
+
+        console.log(`[Webhook] Order ${order.id} processed. User ${order.user_id} upgraded.`);
+
+        res.json({ success: true });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('[Webhook] Error processing payment:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

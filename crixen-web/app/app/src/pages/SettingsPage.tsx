@@ -10,7 +10,7 @@ const PLANS = [
         price: "$0",
         period: "/mo",
         features: ["1 Project", "50 Generations/day", "Local-First Memory"],
-        priceId: null
+        itemId: null
     },
     {
         id: "pro",
@@ -18,7 +18,8 @@ const PLANS = [
         price: "$20",
         period: "/mo",
         features: ["3 Projects", "1500 Generations/day", "Priority Support"],
-        priceId: "price_pro_test" // In prod, use env var
+        itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5",
+        amount: "20.00"
     },
     {
         id: "agency",
@@ -26,7 +27,8 @@ const PLANS = [
         price: "$200",
         period: "/mo",
         features: ["Unlimited Projects", "Unlimited Generations", "Dedicated Account Manager"],
-        priceId: "price_agency_test"
+        itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5", // TODO: Get Agency Item ID
+        amount: "200.00"
     }
 ];
 
@@ -36,14 +38,14 @@ export default function SettingsPage() {
     const [error, setError] = useState<string | null>(null);
 
     const handleUpgrade = async (plan: any) => {
-        if (!plan.priceId || !user) return;
+        if (!plan.itemId || !user) return;
         if (plan.id === user.tier) return; // Already on plan
 
         setLoading(true);
         setError(null);
 
         try {
-            const data = await api.billing.createCheckoutSession(plan.priceId);
+            const data = await api.billing.createHotOrder(plan.itemId, plan.amount);
             if (data.url) {
                 window.location.href = data.url;
             } else {
@@ -78,8 +80,8 @@ export default function SettingsPage() {
                         <div
                             key={plan.id}
                             className={`flex flex-col p-6 rounded-2xl bg-white/[0.03] border transition-all ${isCurrent
-                                    ? 'border-dark-text/30 ring-1 ring-dark-text/30 bg-white/[0.05]'
-                                    : 'border-white/5 hover:border-white/10'
+                                ? 'border-dark-text/30 ring-1 ring-dark-text/30 bg-white/[0.05]'
+                                : 'border-white/5 hover:border-white/10'
                                 }`}
                         >
                             <div className="mb-4">
@@ -101,14 +103,14 @@ export default function SettingsPage() {
 
                             <button
                                 className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${isCurrent
-                                        ? 'bg-white/10 text-dark-muted cursor-default'
-                                        : 'bg-dark-text text-dark-bg hover:bg-dark-silver'
+                                    ? 'bg-white/10 text-dark-muted cursor-default'
+                                    : 'bg-dark-text text-dark-bg hover:bg-dark-silver'
                                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 disabled={isCurrent || loading}
                                 onClick={() => handleUpgrade(plan)}
                             >
                                 {loading && !isCurrent ? 'Processing...' : (
-                                    isCurrent ? "Current Plan" : (plan.priceId ? "Upgrade" : "Downgrade")
+                                    isCurrent ? "Current Plan" : (plan.itemId ? "Upgrade" : "Downgrade")
                                 )}
                             </button>
                         </div>
