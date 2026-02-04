@@ -57,9 +57,13 @@ router.post('/generate', async (req, res) => {
         const tokensUsed = data.usage?.total_tokens || 0;
 
         // 3. Log Usage to DB
+        // Sanitize projectId (must be integer or null)
+        let safeProjectId = parseInt(projectId);
+        if (isNaN(safeProjectId)) safeProjectId = null;
+
         await db.query(
             'INSERT INTO usage_logs (user_id, project_id, action_type, tokens_used) VALUES ($1, $2, $3, $4)',
-            [user.id, projectId || null, 'generate_text', tokensUsed]
+            [user.id, safeProjectId, 'generate_text', tokensUsed]
         );
 
         res.json({ content, meta: { usage: data.usage } });

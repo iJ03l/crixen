@@ -61,6 +61,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
+
+      // Trigger extension sync
+      if ((window as any).__crixenSyncAuth) {
+        (window as any).__crixenSyncAuth();
+      }
+
       return true;
     } catch (error: any) {
       set({ error: error.message });
@@ -89,6 +95,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
+
+      // Trigger extension sync
+      if ((window as any).__crixenSyncAuth) {
+        (window as any).__crixenSyncAuth();
+      }
+
       return true;
     } catch (error: any) {
       set({ error: error.message });
@@ -117,6 +129,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
+
+      // Trigger extension sync
+      if ((window as any).__crixenSyncAuth) {
+        (window as any).__crixenSyncAuth();
+      }
+
       return true;
     } catch (error: any) {
       set({ error: error.message });
@@ -127,6 +145,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    // Clear extension auth first
+    if ((window as any).__crixenClearAuth) {
+      (window as any).__crixenClearAuth();
+    }
+
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     set({ token: null, user: null });

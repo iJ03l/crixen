@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useExtensionAuth } from '../hooks/useExtensionAuth';
 import {
     LayoutDashboard,
     Settings,
@@ -11,9 +12,23 @@ import {
 
 export default function DashboardLayout() {
     const { user, logout } = useAuthStore();
+    const { isExtensionInstalled, syncAuthToExtension, clearExtensionAuth } = useExtensionAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Sync auth on mount if extension is present
+    useEffect(() => {
+        if (user && isExtensionInstalled) {
+            syncAuthToExtension();
+        }
+    }, [user, isExtensionInstalled, syncAuthToExtension]);
+
+    // Expose sync handlers for authStore to use on login/logout
+    useEffect(() => {
+        (window as any).__crixenSyncAuth = syncAuthToExtension;
+        (window as any).__crixenClearAuth = clearExtensionAuth;
+    }, [syncAuthToExtension, clearExtensionAuth]);
 
     const sidebarItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -34,6 +49,11 @@ export default function DashboardLayout() {
                         <img src="/logo.png" alt="Crixen" className="h-8 w-auto object-contain" />
                         Crixen
                     </button>
+                    {isExtensionInstalled && (
+                        <span className="text-[10px] text-green-400 font-medium block mt-1 ml-1 px-2 py-0.5 bg-green-900/20 rounded-full w-fit">
+                            Extension Active
+                        </span>
+                    )}
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1">
