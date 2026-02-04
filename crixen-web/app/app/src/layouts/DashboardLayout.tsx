@@ -7,7 +7,8 @@ import {
     Settings,
     FileText,
     Menu,
-    X
+    X,
+    LogOut
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -83,8 +84,12 @@ export default function DashboardLayout() {
                             <p className="text-sm font-medium truncate">{user.email}</p>
                             <p className="text-xs text-dark-muted capitalize">{user.tier} Plan</p>
                         </div>
-                        <button onClick={logout} className="text-dark-muted hover:text-white" title="Logout">
-                            <X size={16} />
+                        <button
+                            onClick={logout}
+                            className="p-2 rounded-lg text-dark-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            title="Logout"
+                        >
+                            <LogOut size={18} />
                         </button>
                     </div>
                 </div>
@@ -124,7 +129,10 @@ export default function DashboardLayout() {
                         ))}
                         <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                             <span className="text-sm text-dark-muted">Logged in as {user.email}</span>
-                            <button onClick={logout} className="text-sm text-red-400">Logout</button>
+                            <button onClick={logout} className="flex items-center gap-2 text-sm font-medium text-dark-muted hover:text-red-400 transition-colors">
+                                <LogOut size={16} />
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
                 )}

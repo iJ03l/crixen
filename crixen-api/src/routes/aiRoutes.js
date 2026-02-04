@@ -27,7 +27,7 @@ router.post('/generate', async (req, res) => {
         const limit = LIMITS[tier] || 50;
 
         if (currentUsage >= limit) {
-            return res.status(403).json({ error: 'Daily quota exceeded' });
+            return res.status(403).json({ error: 'Daily limit reached. Upgrade on dashboard to continue.' });
         }
 
         // 2. Call NEAR AI

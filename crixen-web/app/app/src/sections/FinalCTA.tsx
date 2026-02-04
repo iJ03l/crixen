@@ -1,15 +1,16 @@
 import { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Mail } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import { ArrowRight } from 'lucide-react';
+import Footer from '../components/Footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const FinalCTA = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const { openAuthModal } = useAuthStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -58,106 +59,18 @@ const FinalCTA = () => {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <button
-              onClick={() => openAuthModal('signup')}
+              onClick={() => navigate('/dashboard')}
               className="btn-primary flex items-center gap-2"
             >
               Get Started
               <ArrowRight size={18} />
-            </button>
-            <button className="btn-secondary flex items-center gap-2">
-              <Mail size={18} />
-              Contact sales
             </button>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-dark-bg border-t border-white/[0.06] py-12 lg:py-16">
-        <div className="w-[86vw] max-w-[1100px] mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
-            {/* Product */}
-            <div>
-              <h4 className="font-heading font-semibold text-sm text-dark-text mb-4">
-                Product
-              </h4>
-              <ul className="space-y-2.5">
-                {['Features', 'Pricing', 'Integrations', 'Changelog'].map(
-                  (item) => (
-                    <li key={item}>
-                      <button className="text-sm text-dark-muted hover:text-dark-text transition-colors">
-                        {item}
-                      </button>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="font-heading font-semibold text-sm text-dark-text mb-4">
-                Resources
-              </h4>
-              <ul className="space-y-2.5">
-                {['Documentation', 'API Reference', 'Blog', 'Community'].map(
-                  (item) => (
-                    <li key={item}>
-                      <button className="text-sm text-dark-muted hover:text-dark-text transition-colors">
-                        {item}
-                      </button>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="font-heading font-semibold text-sm text-dark-text mb-4">
-                Company
-              </h4>
-              <ul className="space-y-2.5">
-                {['About', 'Careers', 'Press', 'Contact'].map((item) => (
-                  <li key={item}>
-                    <button className="text-sm text-dark-muted hover:text-dark-text transition-colors">
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="font-heading font-semibold text-sm text-dark-text mb-4">
-                Legal
-              </h4>
-              <ul className="space-y-2.5">
-                {['Privacy', 'Terms', 'Security', 'Cookies'].map((item) => (
-                  <li key={item}>
-                    <button className="text-sm text-dark-muted hover:text-dark-text transition-colors">
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom */}
-          <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <span className="font-heading font-bold text-lg text-dark-text">
-                Crixen
-              </span>
-            </div>
-            <p className="text-xs text-dark-muted">
-              © {new Date().getFullYear()} Crixen. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </section>
   );
 };

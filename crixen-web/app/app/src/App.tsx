@@ -4,6 +4,15 @@ import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import StrategyPage from './pages/StrategyPage';
 import DashboardLayout from './layouts/DashboardLayout';
+// Content Pages
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import ChangelogPage from './pages/ChangelogPage';
+import DocumentationPage from './pages/DocumentationPage';
+import PrivacyPage from './pages/legal/PrivacyPage';
+import TermsPage from './pages/legal/TermsPage';
+import SecurityPage from './pages/legal/SecurityPage';
+import CookiesPage from './pages/legal/CookiesPage';
 import { useAuthStore } from './store/authStore';
 import './App.css';
 
@@ -13,8 +22,18 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Route */}
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Content Pages */}
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/changelog" element={<ChangelogPage />} />
+        <Route path="/docs" element={<DocumentationPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/security" element={<SecurityPage />} />
+        <Route path="/cookies" element={<CookiesPage />} />
 
         {/* Protected Dashboard Routes */}
         <Route

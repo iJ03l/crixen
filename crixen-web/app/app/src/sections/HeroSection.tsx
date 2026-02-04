@@ -1,8 +1,8 @@
 import { useEffect, useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Play, Sparkles } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,7 +12,7 @@ const HeroSection = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
-  const { openAuthModal } = useAuthStore();
+  const navigate = useNavigate();
 
   // Load animation (on mount)
   useEffect(() => {
@@ -130,7 +130,7 @@ const HeroSection = () => {
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(90deg, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.4) 55%, rgba(5,5,5,0.65) 100%)',
+              'linear-gradient(90deg, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.6) 55%, rgba(5,5,5,0.8) 100%)',
           }}
         />
       </div>
@@ -160,7 +160,7 @@ const HeroSection = () => {
 
               <div className="flex flex-wrap items-center gap-4 mt-6 lg:mt-8">
                 <button
-                  onClick={() => openAuthModal('signup')}
+                  onClick={() => navigate('/dashboard')}
                   className="btn-primary flex items-center gap-2"
                 >
                   <Sparkles size={18} />
@@ -173,7 +173,7 @@ const HeroSection = () => {
               </div>
 
               <p className="font-mono text-xs text-dark-muted mt-4 tracking-wide">
-                No credit card • 2-minute setup
+                Trusted by 500+ creators • Zero setup required
               </p>
             </div>
           </div>
