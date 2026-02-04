@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-LayoutDashboard,
+import {
+    LayoutDashboard,
     Settings,
     FileText,
     Menu,
     X
+} from 'lucide-react';
 
 export default function DashboardLayout() {
     const { user, logout } = useAuthStore();
