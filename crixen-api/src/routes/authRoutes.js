@@ -262,7 +262,7 @@ router.post('/forgot-password', async (req, res) => {
         console.log('Reset link:', resetLink);
 
         const { data, error: resendError } = await resend.emails.send({
-            from: 'Crixen <onboarding@resend.dev>',
+            from: 'Crixen <noreply@crixen.xyz>',
             to: email,
             subject: 'Reset Your Password - Crixen',
             html: `
