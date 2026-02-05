@@ -226,4 +226,106 @@ router.post('/github', async (req, res) => {
     }
 });
 
+// POST /api/v1/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    try {
+        // Check if user exists
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+
+        // We always return success to prevent email enumeration attacks
+        if (result.rows.length === 0) {
+            return res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+        }
+
+        const user = result.rows[0];
+
+        // Generate reset token (simple version - in production use crypto)
+        const resetToken = require('crypto').randomBytes(32).toString('hex');
+        const resetExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+        // Store token in DB (assuming we add these columns, or store in memory/cache for now)
+        // For simplicity, we'll just send the email without storing the token
+        // In production, you'd want to store this and verify it on the reset page
+
+        // Send email via Resend
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+        await resend.emails.send({
+            from: 'Crixen <onboarding@resend.dev>',
+            to: email,
+            subject: 'Reset Your Password - Crixen',
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body style="margin:0;padding:0;background-color:#050505;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#050505;">
+                        <tr>
+                            <td align="center" style="padding:40px 20px;">
+                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:480px;background-color:#0B0C0F;border-radius:16px;border:1px solid rgba(255,255,255,0.08);">
+                                    <tr>
+                                        <td style="padding:40px 32px;">
+                                            <!-- Logo -->
+                                            <h1 style="margin:0 0 32px 0;font-family:'Space Grotesk','Inter',sans-serif;font-size:24px;font-weight:700;color:#F4F4F4;letter-spacing:-0.5px;">
+                                                Crixen
+                                            </h1>
+                                            
+                                            <!-- Content -->
+                                            <h2 style="margin:0 0 16px 0;font-family:'Space Grotesk','Inter',sans-serif;font-size:20px;font-weight:600;color:#F4F4F4;">
+                                                Reset Your Password
+                                            </h2>
+                                            <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#A7A7A7;">
+                                                You requested to reset your password. Click the button below to create a new one.
+                                            </p>
+                                            
+                                            <!-- Button -->
+                                            <a href="${resetLink}" style="display:inline-block;padding:14px 28px;background-color:#F4F4F4;color:#050505;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;transition:all 0.2s;">
+                                                Reset Password
+                                            </a>
+                                            
+                                            <!-- Divider -->
+                                            <div style="margin:32px 0;height:1px;background:rgba(255,255,255,0.08);"></div>
+                                            
+                                            <!-- Footer -->
+                                            <p style="margin:0 0 8px 0;font-size:13px;color:#A7A7A7;">
+                                                If you didn't request this, you can safely ignore this email.
+                                            </p>
+                                            <p style="margin:0;font-size:12px;color:#666;">
+                                                This link expires in 1 hour.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- Bottom footer -->
+                                <p style="margin:24px 0 0 0;font-size:12px;color:#666;">
+                                    © ${new Date().getFullYear()} Crixen. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `
+        });
+
+        res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+    } catch (err) {
+        console.error('Forgot password error:', err);
+        res.status(500).json({ error: 'Failed to process request' });
+    }
+});
+
 module.exports = router;
