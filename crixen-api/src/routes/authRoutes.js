@@ -5,7 +5,11 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const { OAuth2Client } = require('google-auth-library');
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClient = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    'postmessage'
+);
 
 // Helper to generate JWT
 const generateToken = (user) => {
@@ -94,7 +98,7 @@ router.post('/login', async (req, res) => {
 
 // POST /api/v1/auth/google
 router.post('/google', async (req, res) => {
-    const { token, code } = req.body;
+    const { token, code, mode } = req.body;
 
     try {
         let idToken = token;
@@ -121,7 +125,12 @@ router.post('/google', async (req, res) => {
         let user;
 
         if (result.rows.length === 0) {
-            // Create new user linked to Google
+            // STRICT MODE CHECK
+            if (mode === 'login') {
+                return res.status(404).json({ error: 'User not found. Please sign up.' });
+            }
+
+            // Create new user linked to Google (Only if signup or undefined)
             const insert = await db.query(
                 'INSERT INTO users (email, google_id) VALUES ($1, $2) RETURNING id, email, tier',
                 [email, googleId]

@@ -15,7 +15,7 @@ interface AuthState {
   authMode: 'login' | 'signup';
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string) => Promise<boolean>;
-  googleLogin: (code: string) => Promise<boolean>;
+  googleLogin: (code: string, mode?: 'login' | 'signup') => Promise<boolean>;
   logout: () => void;
   openAuthModal: (mode: 'login' | 'signup') => void;
   closeAuthModal: () => void;
@@ -110,14 +110,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  googleLogin: async (code) => {
+  googleLogin: async (code, mode = 'signup') => {
     set({ isLoading: true, error: null });
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
       const response = await fetch(`${apiUrl}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, mode }),
       });
 
       if (!response.ok) {
