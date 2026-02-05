@@ -90,9 +90,17 @@ router.post('/webhook', express.json(), async (req, res) => {
         // 4. Mark Order as Paid
         await db.query('UPDATE orders SET status = $1 WHERE id = $2', ['paid', order.id]);
 
-        // 5. Issue Ticket / Update User Tier
-        // Grant user 'pro' tier
-        await db.query('UPDATE users SET tier = $1 WHERE id = $2', ['pro', order.user_id]);
+        // 5. Determine tier based on amount paid
+        let tier = 'pro'; // Default
+        const amount = parseFloat(order.amount);
+        if (amount >= 100) {
+            tier = 'agency';
+        } else if (amount >= 10) {
+            tier = 'pro';
+        }
+
+        // 6. Update User Tier
+        await db.query('UPDATE users SET tier = $1 WHERE id = $2', [tier, order.user_id]);
 
         // Create Ticket Record
         await db.query(`
