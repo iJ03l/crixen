@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import StrategyPage from './pages/StrategyPage';
 import DashboardLayout from './layouts/DashboardLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 // Content Pages
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -13,12 +14,9 @@ import PrivacyPage from './pages/legal/PrivacyPage';
 import TermsPage from './pages/legal/TermsPage';
 import SecurityPage from './pages/legal/SecurityPage';
 import CookiesPage from './pages/legal/CookiesPage';
-import { useAuthStore } from './store/authStore';
 import './App.css';
 
 function App() {
-  const { user } = useAuthStore();
-
   return (
     <Router>
       <Routes>
@@ -38,7 +36,11 @@ function App() {
         {/* Protected Dashboard Routes */}
         <Route
           path="/dashboard"
-          element={user ? <DashboardLayout /> : <Navigate to="/" replace />}
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
         >
           <Route index element={<DashboardPage />} />
           <Route path="settings" element={<SettingsPage />} />

@@ -238,9 +238,8 @@ router.post('/forgot-password', async (req, res) => {
         // Check if user exists
         const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
 
-        // We always return success to prevent email enumeration attacks
         if (result.rows.length === 0) {
-            return res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+            return res.status(404).json({ error: 'No account found with that email address' });
         }
 
         const user = result.rows[0];
