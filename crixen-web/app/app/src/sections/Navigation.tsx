@@ -27,7 +27,7 @@ const Navigation = () => {
   };
 
   const navItems = [
-    { label: 'Features', id: 'auto-reply' },
+    { label: 'Features', id: 'features' },
     { label: 'How it works', id: 'how-it-works' },
     { label: 'Pricing', id: 'pricing' },
     { label: 'FAQ', id: 'faq' },

@@ -108,7 +108,7 @@ const HeroSection = () => {
     return () => ctx.revert();
   }, []);
 
-  const headlineWords = ['Turn', 'comments', 'into', 'conversations.'];
+  // const headlineWords = ['Turn', 'comments', 'into', 'conversations.']; // Unused
 
   return (
     <section
@@ -154,7 +154,7 @@ const HeroSection = () => {
 
             <div className="hero-subcontent mt-6 lg:mt-8">
               <p className="text-base lg:text-lg text-dark-muted max-w-lg leading-relaxed">
-                Crixen has evolved. Manage multiple brands, automate engagement,
+                Crixen helps Manage multiple brands, automate engagement,
                 and scale your presence with our robust, centralized SaaS platform.
               </p>
 
@@ -164,7 +164,7 @@ const HeroSection = () => {
                   className="btn-primary flex items-center gap-2"
                 >
                   <Sparkles size={18} />
-                  Get Started
+                  Install Extension
                 </button>
                 <button className="btn-secondary flex items-center gap-2">
                   <Play size={18} />
@@ -173,7 +173,7 @@ const HeroSection = () => {
               </div>
 
               <p className="font-mono text-xs text-dark-muted mt-4 tracking-wide">
-                Trusted by 500+ creators • Zero setup required
+                Trusted by 500+ creators • Download Extension
               </p>
             </div>
           </div>

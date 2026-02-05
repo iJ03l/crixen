@@ -51,7 +51,7 @@ export default function DashboardLayout() {
                         Crixen
                     </button>
                     {isExtensionInstalled && (
-                        <span className="text-[10px] text-green-400 font-medium block mt-1 ml-1 px-2 py-0.5 bg-green-900/20 rounded-full w-fit">
+                        <span className="text-[9px] text-green-400 font-medium block mt-0.5 ml-1 px-1.5 py-0 bg-green-900/20 rounded-full w-fit">
                             Extension Active
                         </span>
                     )}

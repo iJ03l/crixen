@@ -38,6 +38,9 @@ export function useExtensionAuth(): ExtensionAuthHook {
 
         window.addEventListener('message', handleMessage);
 
+        // Ping extension in case we missed the initial ready message
+        window.postMessage({ type: 'CRIXEN_CHECK_EXTENSION', payload: {} }, window.location.origin);
+
         return () => window.removeEventListener('message', handleMessage);
     }, []);
 

@@ -4,8 +4,9 @@ interface FeatureProps {
     id: string;
     eyebrow: string;
     headline: string;
-    description: string;
+    description: string | React.ReactNode;
     linkText: string;
+    href?: string;
     backgroundImage: string;
     uiCardType: 'reply' | 'tone' | 'platforms' | 'analytics';
 }
@@ -181,13 +182,25 @@ const CombinedFeatureSection = ({ feature1, feature2, feature3 }: CombinedFeatur
                 <h2 className="font-heading font-bold text-2xl lg:text-3xl text-dark-text leading-tight mb-2">
                     {feature.headline}
                 </h2>
-                <p className="text-sm text-dark-muted leading-relaxed mb-4">
+                <div className="text-sm text-dark-muted leading-relaxed mb-4">
                     {feature.description}
-                </p>
-                <button className="inline-flex items-center gap-2 text-sm text-dark-silver hover:text-dark-text transition-colors group">
-                    {feature.linkText}
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+                </div>
+                {feature.href ? (
+                    <a
+                        href={feature.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-dark-silver hover:text-dark-text transition-colors group"
+                    >
+                        {feature.linkText}
+                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </a>
+                ) : (
+                    <button className="inline-flex items-center gap-2 text-sm text-dark-silver hover:text-dark-text transition-colors group">
+                        {feature.linkText}
+                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                )}
             </div>
             <div className="glass-card bg-white/[0.02]">
                 {renderUICard(feature.uiCardType)}

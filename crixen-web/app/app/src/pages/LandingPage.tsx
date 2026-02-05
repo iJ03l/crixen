@@ -43,14 +43,25 @@ export default function LandingPage() {
                 </div>
 
                 {/* Merged Section: Secure, Tone & Dashboard - z-20 */}
-                <div className="relative z-20">
+                <div id="features" className="relative z-20 scroll-mt-24">
                     <CombinedFeatureSection
                         feature1={{
                             id: "auto-reply",
                             eyebrow: "SECURE GENERATION",
                             headline: "Reply in seconds. Zero API keys.",
-                            description: "Enterprise-grade security built-in. All AI requests are signed and proxied through our backend—never expose your secrets.",
+                            description: (
+                                <>
+                                    Crixen safeguards your brand with enterprise-grade security. All requests are signed and proxied—never exposing your secrets.
+                                    <br /><br />
+                                    <strong>Built on NEAR AI for User-Owned, Verifiable AI.</strong>
+                                    <br />
+                                    We deploy your custom voice models using Private Inference on <strong>Intel TDX and NVIDIA Confidential Computing</strong> infrastructure.
+                                    <br /><br />
+                                    Your data runs inside a <strong>Trusted Execution Environment</strong> with real-time verification, ensuring total isolation and encryption. Trusted by enterprises, ready for your sensitive workloads.
+                                </>
+                            ),
                             linkText: "See security specs",
+                            href: "https://near.ai",
                             backgroundImage: "/feature_auto_bg.jpg",
                             uiCardType: "reply"
                         }}
