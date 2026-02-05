@@ -99,14 +99,20 @@ router.post('/webhook', express.json(), async (req, res) => {
             tier = 'pro';
         }
 
-        // 6. Update User Tier
-        await db.query('UPDATE users SET tier = $1 WHERE id = $2', [tier, order.user_id]);
+        // 6. Update User Tier + Set Subscription Expiry (30 days from now)
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+
+        await db.query(
+            `UPDATE users SET tier = $1, subscription_expires_at = $2, expiry_reminder_sent = FALSE WHERE id = $3`,
+            [tier, expiresAt.toISOString(), order.user_id]
+        );
 
         // Create Ticket Record
         await db.query(`
             INSERT INTO tickets (user_id, order_id, ticket_data)
             VALUES ($1, $2, $3)
-        `, [order.user_id, order.id, JSON.stringify({ issued_at: new Date(), description: 'Pro Upgrade' })]);
+        `, [order.user_id, order.id, JSON.stringify({ issued_at: new Date(), description: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Upgrade`, expires_at: expiresAt })]);
 
         console.log(`[Webhook] Order ${order.id} processed. User ${order.user_id} upgraded.`);
 

@@ -49,6 +49,10 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Initialize Subscription Scheduler
+const { initScheduler } = require('./scheduler');
+initScheduler();
+
 app.listen(PORT, () => {
     console.log(`🚀 Crixen API running on port ${PORT}`);
 });

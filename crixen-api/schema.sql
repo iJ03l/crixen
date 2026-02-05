@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255), -- Nullable for social login users
     google_id VARCHAR(255) UNIQUE,
     github_id VARCHAR(255) UNIQUE,
-    tier VARCHAR(50) DEFAULT 'free',
+    tier VARCHAR(50) DEFAULT 'starter',
+    subscription_expires_at TIMESTAMP WITH TIME ZONE,
+    expiry_reminder_sent BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
