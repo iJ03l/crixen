@@ -5,23 +5,28 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 
 const AuthModal = () => {
-  const { authMode, closeAuthModal, toggleAuthMode, login, signup, googleLogin, isLoading, error } = useAuthStore();
+  const { authMode, closeAuthModal, toggleAuthMode, setAuthMode, login, signup, googleLogin, forgotPassword, isLoading, error } = useAuthStore();
   const navigate = useNavigate();
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
-      const success = await googleLogin(codeResponse.code, authMode);
+      const mode = authMode === 'forgot-password' ? 'login' : authMode;
+      const success = await googleLogin(codeResponse.code, mode);
       if (success) navigate('/dashboard');
     },
     flow: 'auth-code',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
+
+  const isForgotPassword = authMode === 'forgot-password';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,9 +53,15 @@ const AuthModal = () => {
 
     let success = false;
     if (authMode === 'login') {
-      success = await login(formData.email, formData.password);
-    } else {
+      success = await login(formData.email, formData.password, rememberMe);
+    } else if (authMode === 'signup') {
       success = await signup(formData.email, formData.password);
+    } else if (authMode === 'forgot-password') {
+      success = await forgotPassword(formData.email);
+      if (success) {
+        setForgotPasswordSuccess(true);
+        return;
+      }
     }
 
     if (success) {
@@ -81,14 +92,22 @@ const AuthModal = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <h2 className="font-heading font-bold text-2xl text-dark-text mb-2">
-            {isLogin ? 'Welcome back' : 'Create your account'}
+            {isForgotPassword ? 'Reset password' : isLogin ? 'Welcome back' : 'Create your account'}
           </h2>
           <p className="text-sm text-dark-muted">
-            {isLogin
-              ? 'Sign in to continue to Crixen'
-              : 'Start your free trial today'}
+            {isForgotPassword
+              ? 'Enter your email to receive a reset link'
+              : isLogin
+                ? 'Sign in to continue to Crixen'
+                : 'Start your free trial today'}
           </p>
         </div>
+
+        {forgotPasswordSuccess && (
+          <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm text-center">
+            Check your email for a password reset link.
+          </div>
+        )}
 
         {(error || validationError) && (
           <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
@@ -144,50 +163,55 @@ const AuthModal = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm text-dark-text mb-1.5">
-              Password
-            </label>
-            <div className="relative">
-              <Lock
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-muted"
-              />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                className="w-full pl-10 pr-12 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-dark-text placeholder:text-dark-muted/50 focus:outline-none focus:border-dark-silver/30 transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/[0.05] rounded transition-colors"
-              >
-                {showPassword ? (
-                  <EyeOff size={18} className="text-dark-muted" />
-                ) : (
-                  <Eye size={18} className="text-dark-muted" />
-                )}
-              </button>
+          {!isForgotPassword && (
+            <div>
+              <label className="block text-sm text-dark-text mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-muted"
+                />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full pl-10 pr-12 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-dark-text placeholder:text-dark-muted/50 focus:outline-none focus:border-dark-silver/30 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/[0.05] rounded transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} className="text-dark-muted" />
+                  ) : (
+                    <Eye size={18} className="text-dark-muted" />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {isLogin && (
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 rounded border-white/[0.15] bg-white/[0.05] text-dark-silver focus:ring-dark-silver/30"
                 />
                 <span className="text-sm text-dark-muted">Remember me</span>
               </label>
               <button
                 type="button"
+                onClick={() => { setForgotPasswordSuccess(false); setAuthMode('forgot-password'); }}
                 className="text-sm text-dark-silver hover:text-dark-text transition-colors"
               >
                 Forgot password?
@@ -202,6 +226,8 @@ const AuthModal = () => {
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-dark-bg/30 border-t-dark-bg rounded-full animate-spin" />
+            ) : isForgotPassword ? (
+              'Send reset link'
             ) : isLogin ? (
               'Sign in'
             ) : (
@@ -250,13 +276,27 @@ const AuthModal = () => {
 
         {/* Toggle */}
         <p className="text-center text-sm text-dark-muted mt-6">
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button
-            onClick={toggleAuthMode}
-            className="text-dark-silver hover:text-dark-text transition-colors font-medium"
-          >
-            {isLogin ? 'Sign up' : 'Sign in'}
-          </button>
+          {isForgotPassword ? (
+            <>
+              Remembered your password?{' '}
+              <button
+                onClick={() => { setForgotPasswordSuccess(false); setAuthMode('login'); }}
+                className="text-dark-silver hover:text-dark-text transition-colors font-medium"
+              >
+                Sign in
+              </button>
+            </>
+          ) : (
+            <>
+              {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+              <button
+                onClick={toggleAuthMode}
+                className="text-dark-silver hover:text-dark-text transition-colors font-medium"
+              >
+                {isLogin ? 'Sign up' : 'Sign in'}
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>

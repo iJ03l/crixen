@@ -12,25 +12,27 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   isAuthModalOpen: boolean;
-  authMode: 'login' | 'signup';
-  login: (email: string, password: string) => Promise<boolean>;
+  authMode: 'login' | 'signup' | 'forgot-password';
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   signup: (email: string, password: string) => Promise<boolean>;
   googleLogin: (code: string, mode?: 'login' | 'signup') => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<boolean>;
   logout: () => void;
   openAuthModal: (mode: 'login' | 'signup') => void;
   closeAuthModal: () => void;
   toggleAuthMode: () => void;
+  setAuthMode: (mode: 'login' | 'signup' | 'forgot-password') => void;
 }
 
-// Helper to get initial state from localStorage
+// Helper to get initial state from localStorage or sessionStorage
 const getInitialState = () => {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
   let user = null;
   try {
     user = userStr ? JSON.parse(userStr) : null;
   } catch (e) {
-    console.error('Failed to parse user from localStorage', e);
+    console.error('Failed to parse user from storage', e);
   }
   return { token, user };
 };
@@ -42,7 +44,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthModalOpen: false,
   authMode: 'signup',
 
-  login: async (email, password) => {
+  login: async (email, password, rememberMe = true) => {
     set({ isLoading: true, error: null });
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
@@ -58,8 +60,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
 
       const data = await response.json();
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      if (rememberMe) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      } else {
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+      }
       set({ token: data.token, user: data.user, isAuthModalOpen: false });
 
       // Trigger extension sync
@@ -152,6 +159,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     set({ token: null, user: null });
   },
 
@@ -161,4 +170,29 @@ export const useAuthStore = create<AuthState>((set) => ({
     authMode: state.authMode === 'login' ? 'signup' : 'login',
     error: null
   })),
+  setAuthMode: (mode) => set({ authMode: mode, error: null }),
+
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${apiUrl}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Request failed');
+      }
+
+      return true;
+    } catch (error: any) {
+      set({ error: error.message });
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));

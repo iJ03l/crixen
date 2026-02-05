@@ -173,7 +173,7 @@ const HeroSection = () => {
               </div>
 
               <p className="font-mono text-xs text-dark-muted mt-4 tracking-wide">
-                Trusted by 500+ creators • Download Extension
+                Trusted by creators/enterprises • Little to no setup step required
               </p>
             </div>
           </div>

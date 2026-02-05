@@ -8,7 +8,8 @@ import {
     FileText,
     Menu,
     X,
-    LogOut
+    LogOut,
+    Chrome
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -142,6 +143,18 @@ export default function DashboardLayout() {
                     <Outlet />
                 </div>
             </main>
+            {/* Floating Extension Install Button */}
+            {!isExtensionInstalled && (
+                <a
+                    href="https://chromewebstore.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 bg-white text-black hover:bg-gray-200 font-bold rounded-full shadow-xl hover:scale-105 transition-all duration-300 group"
+                >
+                    <Chrome size={20} className="text-black" />
+                    <span>Install Extension</span>
+                </a>
+            )}
         </div>
     );
 }

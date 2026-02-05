@@ -67,17 +67,17 @@ const HowItWorks = () => {
     },
     {
       number: '02',
-      icon: Sliders,
-      title: 'Define your strategy',
-      description:
-        'Create a "Brain" for each project. Crixen learns from your inputs to ensure on-brand replies.',
-    },
-    {
-      number: '03',
       icon: Zap,
       title: 'Engage everywhere',
       description:
         'Install the extension and sync your strategy. Handle comments and DMs across all platforms instantly.',
+    },
+    {
+      number: '03',
+      icon: Sliders,
+      title: 'Define your strategy',
+      description:
+        'Create a "Brain" for each project. Crixen learns from your inputs to ensure on-brand replies.',
     },
   ];
 
