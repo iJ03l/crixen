@@ -61,15 +61,37 @@ router.post('/', async (req, res) => {
 // PUT /api/v1/projects/:id
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, brand_voice, strategies } = req.body;
     const user = req.user;
 
-    if (!name) return res.status(400).json({ error: 'Project name is required' });
+    // Build dynamic update query
+    const updates = [];
+    const values = [];
+    let paramIndex = 1;
+
+    if (name !== undefined) {
+        updates.push(`name = $${paramIndex++}`);
+        values.push(name);
+    }
+    if (brand_voice !== undefined) {
+        updates.push(`brand_voice = $${paramIndex++}`);
+        values.push(brand_voice);
+    }
+    if (strategies !== undefined) {
+        updates.push(`strategies = $${paramIndex++}`);
+        values.push(JSON.stringify(strategies));
+    }
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    values.push(id, user.id);
 
     try {
         const result = await db.query(
-            'UPDATE projects SET name = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
-            [name, id, user.id]
+            `UPDATE projects SET ${updates.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex} RETURNING *`,
+            values
         );
 
         if (result.rows.length === 0) {
