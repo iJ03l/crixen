@@ -17,6 +17,7 @@ interface AuthState {
   signup: (email: string, password: string) => Promise<boolean>;
   googleLogin: (code: string, mode?: 'login' | 'signup') => Promise<boolean>;
   forgotPassword: (email: string) => Promise<boolean>;
+  refreshUser: () => Promise<boolean>;
   logout: () => void;
   openAuthModal: (mode: 'login' | 'signup') => void;
   closeAuthModal: () => void;
@@ -193,6 +194,35 @@ export const useAuthStore = create<AuthState>((set) => ({
       return false;
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  refreshUser: async () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) return false;
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${apiUrl}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+
+      // Update stored user data
+      if (localStorage.getItem('user')) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      } else if (sessionStorage.getItem('user')) {
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+      }
+
+      set({ user: data.user });
+      return true;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return false;
     }
   },
 }));
