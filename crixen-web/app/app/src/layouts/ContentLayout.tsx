@@ -26,6 +26,9 @@ const ContentLayout = ({ children, title, subtitle }: ContentLayoutProps) => {
                     >
                         <img src="/logo.png" alt="Crixen" className="h-8 w-auto object-contain" />
                         Crixen
+                        <span className="ml-2 px-1.5 py-0.5 text-[0.6rem] font-bold bg-primary-500/20 text-primary-400 rounded border border-primary-500/30 tracking-wider">
+                            ALPHA
+                        </span>
                     </button>
                     <div className='flex gap-4'>
                         <button onClick={() => navigate('/dashboard')} className="text-sm font-medium text-dark-muted hover:text-white transition-colors">

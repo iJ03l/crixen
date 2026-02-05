@@ -50,6 +50,9 @@ const Navigation = () => {
             >
               <img src="/logo.png" alt="Crixen" className="h-8 w-auto object-contain" />
               Crixen
+              <span className="ml-2 px-1.5 py-0.5 text-[0.6rem] font-bold bg-primary-500/20 text-primary-400 rounded border border-primary-500/30 tracking-wider">
+                ALPHA
+              </span>
             </button>
 
             {/* Desktop Navigation */}

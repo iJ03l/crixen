@@ -13,6 +13,7 @@ import FAQ from '../sections/FAQ';
 import FinalCTA from '../sections/FinalCTA';
 import AuthModal from '../sections/AuthModal';
 import { useAuthStore } from '../store/authStore';
+import SEO from '../components/SEO';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,6 +30,7 @@ export default function LandingPage() {
 
     return (
         <div ref={mainRef} className="relative bg-dark-bg min-h-screen">
+            <SEO />
             {/* Noise overlay */}
             <div className="noise-overlay" />
 

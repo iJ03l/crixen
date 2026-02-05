@@ -50,6 +50,9 @@ export default function DashboardLayout() {
                     <button onClick={() => navigate('/')} className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight">
                         <img src="/logo.png" alt="Crixen" className="h-8 w-auto object-contain" />
                         Crixen
+                        <span className="ml-2 px-1.5 py-0.5 text-[0.6rem] font-bold bg-primary-500/20 text-primary-400 rounded border border-primary-500/30 tracking-wider">
+                            ALPHA
+                        </span>
                     </button>
                     {isExtensionInstalled && (
                         <span className="text-[9px] text-green-400 font-medium block mt-0.5 ml-1 px-1.5 py-0 bg-green-900/20 rounded-full w-fit">
@@ -102,7 +105,12 @@ export default function DashboardLayout() {
                 <header className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-dark-bg/80 backdrop-blur sticky top-0 z-50">
                     <div className="flex items-center gap-2">
                         <img src="/logo.png" alt="Crixen" className="h-8 w-auto" />
-                        <span className="font-heading font-bold text-xl">Crixen</span>
+                        <span className="font-heading font-bold text-xl flex items-center gap-2">
+                            Crixen
+                            <span className="px-1.5 py-0.5 text-[0.6rem] font-bold bg-primary-500/20 text-primary-400 rounded border border-primary-500/30 tracking-wider">
+                                ALPHA
+                            </span>
+                        </span>
                     </div>
                     <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
