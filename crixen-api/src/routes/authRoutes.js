@@ -258,7 +258,10 @@ router.post('/forgot-password', async (req, res) => {
 
         const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
 
-        await resend.emails.send({
+        console.log('Sending reset email to:', email);
+        console.log('Reset link:', resetLink);
+
+        const { data, error: resendError } = await resend.emails.send({
             from: 'Crixen <onboarding@resend.dev>',
             to: email,
             subject: 'Reset Your Password - Crixen',
@@ -320,7 +323,13 @@ router.post('/forgot-password', async (req, res) => {
             `
         });
 
-        res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+        if (resendError) {
+            console.error('Resend error:', resendError);
+            return res.status(500).json({ error: 'Failed to send email: ' + resendError.message });
+        }
+
+        console.log('Email sent successfully:', data);
+        res.json({ message: 'Password reset email sent successfully' });
     } catch (err) {
         console.error('Forgot password error:', err);
         res.status(500).json({ error: 'Failed to process request' });
