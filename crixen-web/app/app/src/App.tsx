@@ -14,6 +14,7 @@ import PrivacyPage from './pages/legal/PrivacyPage';
 import TermsPage from './pages/legal/TermsPage';
 import SecurityPage from './pages/legal/SecurityPage';
 import CookiesPage from './pages/legal/CookiesPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Content Pages */}
         <Route path="/about" element={<AboutPage />} />
