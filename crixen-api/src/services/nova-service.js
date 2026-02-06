@@ -12,7 +12,38 @@ class NovaService {
         this.initialized = false;
     }
 
-    // ... (isReady and getSdk methods remain unchanged)
+    /**
+     * Check if NOVA is configured and ready
+     */
+    isReady() {
+        return !!process.env.NOVA_API_KEY;
+    }
+
+    /**
+     * Get or create SDK instance for a user's NEAR account
+     */
+    async getSdk(nearAccountId) {
+        if (!this.isReady()) {
+            throw new Error('NOVA_API_KEY not configured');
+        }
+
+        if (!this.sdkCache.has(nearAccountId)) {
+            const config = {
+                apiKey: process.env.NOVA_API_KEY
+            };
+
+            // Use testnet for development
+            if (process.env.NOVA_USE_TESTNET === 'true') {
+                config.rpcUrl = 'https://rpc.testnet.near.org';
+                config.contractId = 'nova-sdk-6.testnet';
+            }
+
+            const sdk = new NovaSdk(nearAccountId, config);
+            this.sdkCache.set(nearAccountId, sdk);
+        }
+
+        return this.sdkCache.get(nearAccountId);
+    }
 
     /**
      * Generate NOVA group ID for a project
