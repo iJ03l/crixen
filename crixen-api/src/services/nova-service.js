@@ -49,7 +49,7 @@ class NovaService {
      * Generate NOVA group ID for a project
      */
     getGroupId(projectId) {
-        return `crixen-project-${projectId}`;
+        return 'crixen-global-store';
     }
 
     /**
