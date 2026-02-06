@@ -113,7 +113,7 @@ const HeroSection = () => {
   return (
     <section
       ref={sectionRef}
-      className="section-pinned bg-dark-bg flex items-center justify-center"
+      className="section-pinned bg-dark-bg flex items-start lg:items-center justify-start lg:justify-center"
     >
       {/* Background Image */}
       <div
@@ -136,7 +136,7 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full px-6 lg:px-[8vw] py-20">
+      <div className="relative z-10 w-full px-6 lg:px-[8vw] pt-32 pb-20 lg:py-20">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
           {/* Left Content */}
           <div ref={contentRef} className="w-full lg:w-[42vw] text-left">
