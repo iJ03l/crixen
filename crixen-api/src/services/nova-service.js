@@ -19,9 +19,7 @@ class NovaService {
         return !!process.env.NOVA_API_KEY;
     }
 
-    /**
-     * Get or create SDK instance for a user's NEAR account
-     */
+
     async getSdk(nearAccountId) {
         if (!this.isReady()) {
             throw new Error('NOVA_API_KEY not configured');
@@ -52,9 +50,7 @@ class NovaService {
         return 'crixen-global-store';
     }
 
-    /**
-     * Ensure NOVA group exists for a project
-     */
+
     async ensureGroup(nearAccountId, projectId) {
         if (!this.isReady()) return false;
 
