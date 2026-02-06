@@ -128,10 +128,21 @@ const Footer = () => {
 
                 {/* Bottom */}
                 <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/[0.06]">
-                    <div className="flex items-center gap-2 mb-4 md:mb-0">
+                    <div className="flex items-center gap-4 mb-4 md:mb-0">
                         <span className="font-heading font-bold text-lg text-dark-text">
                             Crixen
                         </span>
+                        <a
+                            href="https://x.com/crixenai"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-dark-muted hover:text-dark-text transition-colors"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg>
+                            <span className="text-sm">@crixenai</span>
+                        </a>
                     </div>
                     <p className="text-xs text-dark-muted">
                         © {new Date().getFullYear()} Crixen. All rights reserved.

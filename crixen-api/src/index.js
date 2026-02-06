@@ -8,6 +8,7 @@ const compression = require('compression');
 const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const novaRoutes = require('./routes/novaRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,7 +37,8 @@ app.use(morgan('dev'));
 app.use('/api/v1/auth', require('./routes/authRoutes'));
 app.use('/api/v1/projects', require('./routes/projectRoutes'));
 app.use('/api/v1/ai', require('./routes/aiRoutes'));
-app.use('/api/v1/billing', require('./routes/billingRoutes')); // New Billing Route
+app.use('/api/v1/billing', require('./routes/billingRoutes')); // Billing Route
+app.use('/api/v1/nova', novaRoutes); // NOVA encrypted storage routes
 
 // Health Check
 app.get('/health', (req, res) => {
@@ -52,6 +54,14 @@ app.use((err, req, res, next) => {
 // Initialize Subscription Scheduler
 const { initScheduler } = require('./scheduler');
 initScheduler();
+
+// Initialize NEAR Account Factory (for invisible wallet creation)
+const { nearFactory } = require('./services/near-account-factory');
+nearFactory.initialize().then(() => {
+    console.log('🔐 NEAR Account Factory ready');
+}).catch(err => {
+    console.warn('⚠️ NEAR Account Factory not initialized:', err.message);
+});
 
 app.listen(PORT, () => {
     console.log(`🚀 Crixen API running on port ${PORT}`);

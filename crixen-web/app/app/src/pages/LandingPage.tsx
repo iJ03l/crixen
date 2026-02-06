@@ -49,17 +49,17 @@ export default function LandingPage() {
                     <CombinedFeatureSection
                         feature1={{
                             id: "auto-reply",
-                            eyebrow: "SECURE GENERATION",
-                            headline: "Reply in seconds. Zero API keys.",
+                            eyebrow: "ZERO-KNOWLEDGE SECURITY",
+                            headline: "Reply in seconds. Encrypted by design.",
                             description: (
                                 <>
                                     Crixen safeguards your brand with enterprise-grade security. All requests are signed and proxied—never exposing your secrets.
                                     <br /><br />
-                                    <strong>Built on NEAR AI for User-Owned, Verifiable AI.</strong>
+                                    <strong>NOVA Encrypted Storage</strong>
                                     <br />
-                                    We deploy your custom voice models using Private Inference on <strong>Intel TDX and NVIDIA Confidential Computing</strong> infrastructure.
+                                    Your strategies are encrypted and stored on IPFS with invisible NEAR accounts created automatically. Only you can decrypt your data.
                                     <br /><br />
-                                    Your data runs inside a <strong>Trusted Execution Environment</strong> with real-time verification, ensuring total isolation and encryption. Trusted by enterprises, ready for your sensitive workloads.
+                                    Built on <strong>NEAR AI with Trusted Execution Environments</strong> for verifiable, user-owned AI that enterprises trust.
                                 </>
                             ),
                             linkText: "See security specs",
@@ -69,19 +69,19 @@ export default function LandingPage() {
                         }}
                         feature2={{
                             id: "tone-control",
-                            eyebrow: "CENTRALIZED BRAIN",
+                            eyebrow: "STRATEGY BRAIN",
                             headline: "Define your strategy once. Deploy everywhere.",
-                            description: "Create distinct 'Brains' for each brand. Crixen helps you maintain a consistent voice across all your accounts.",
+                            description: "Create distinct 'Brains' for each project with brand voice and captured strategies. Sync from Notion, edit from dashboard or extension—all encrypted and versioned.",
                             linkText: "Explore strategy tools",
                             backgroundImage: "/feature_tone_bg.jpg",
                             uiCardType: "tone"
                         }}
                         feature3={{
                             id: "multi-platform",
-                            eyebrow: "UNIFIED DASHBOARD",
-                            headline: "Manage multiple brands.",
-                            description: "Switch between projects instantly. Perfect for agencies and creators.",
-                            linkText: "View integrations",
+                            eyebrow: "TIER-BASED MANAGEMENT",
+                            headline: "Scale with your needs.",
+                            description: "Starter gets 1 project, Pro gets 3, Agency gets unlimited. Each project has its own strategies and brand voice—perfect for agencies and creators.",
+                            linkText: "View pricing",
                             backgroundImage: "/feature_multi_bg.jpg",
                             uiCardType: "platforms"
                         }}

@@ -77,8 +77,12 @@ router.post('/generate', async (req, res) => {
 router.get('/stats', async (req, res) => {
     const user = req.user;
     const limits = { starter: 10, pro: 150, agency: 999999 };
-    const limit = limits[user.tier] || 10;
-    const projectLimit = user.tier === 'starter' ? 1 : (user.tier === 'pro' ? 3 : 999);
+
+    // Normalize tier: free -> starter
+    const tier = (user.tier === 'free' || user.tier === 'starter') ? 'starter' : (user.tier || 'starter');
+
+    const limit = limits[tier] || 10;
+    const projectLimit = tier === 'starter' ? 1 : (tier === 'pro' ? 3 : Infinity);
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);

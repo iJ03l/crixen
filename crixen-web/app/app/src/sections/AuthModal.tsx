@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { X, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,6 @@ const AuthModal = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
   });
@@ -117,29 +116,7 @@ const AuthModal = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {authMode === 'signup' && (
-            <div>
-              <label className="block text-sm text-dark-text mb-1.5">
-                Full name
-              </label>
-              <div className="relative">
-                <User
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-muted"
-                />
-                <input
-                  type="text"
-                  required
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-dark-text placeholder:text-dark-muted/50 focus:outline-none focus:border-dark-silver/30 transition-colors"
-                />
-              </div>
-            </div>
-          )}
+
 
           <div>
             <label className="block text-sm text-dark-text mb-1.5">

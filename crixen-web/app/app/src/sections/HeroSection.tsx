@@ -154,8 +154,8 @@ const HeroSection = () => {
 
             <div className="hero-subcontent mt-6 lg:mt-8">
               <p className="text-base lg:text-lg text-dark-muted max-w-lg leading-relaxed">
-                Crixen helps Manage multiple brands, automate engagement,
-                and scale your presence with our robust, centralized SaaS platform.
+                Crixen helps you manage multiple brands with encrypted strategy storage,
+                automated engagement, and a centralized dashboard that scales with your needs.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mt-6 lg:mt-8">

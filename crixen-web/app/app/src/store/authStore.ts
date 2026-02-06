@@ -3,7 +3,7 @@ import { create } from 'zustand';
 interface User {
   id: string;
   email: string;
-  tier: 'starter' | 'pro' | 'agency';
+  tier: 'starter' | 'free' | 'pro' | 'agency';
 }
 
 interface AuthState {

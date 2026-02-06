@@ -51,15 +51,45 @@ router.post('/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Insert user
+        // Insert user with NOVA flag
         const result = await db.query(
-            'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, tier',
-            [email, hashedPassword]
+            'INSERT INTO users (email, password_hash, uses_nova) VALUES ($1, $2, $3) RETURNING id, email, tier',
+            [email, hashedPassword, true]
         );
 
         const user = result.rows[0];
+
+        // Create invisible NEAR account for new user
+        let nearAccountId = null;
+        try {
+            const { nearFactory } = require('../services/near-account-factory');
+
+            if (nearFactory.isReady()) {
+                const nearAccount = await nearFactory.createUserAccount(email, user.id);
+
+                // Encrypt and store private key
+                const encryptedKey = nearFactory.encryptPrivateKey(nearAccount.privateKey, user.id);
+
+                await db.query(`
+                    INSERT INTO user_wallets (user_id, near_account_id, near_public_key, near_private_key_encrypted)
+                    VALUES ($1, $2, $3, $4)
+                `, [user.id, nearAccount.accountId, nearAccount.publicKey, encryptedKey]);
+
+                nearAccountId = nearAccount.accountId;
+                console.log(`✅ Created NEAR wallet for ${email}: ${nearAccountId}`);
+            } else {
+                console.warn('⚠️ NEAR factory not ready, skipping wallet creation');
+            }
+        } catch (nearError) {
+            // Log but don't fail registration if NEAR account creation fails
+            console.error('❌ NEAR account creation failed (non-blocking):', nearError.message);
+        }
+
         const token = generateToken(user);
-        res.json({ token, user });
+        res.json({
+            token,
+            user: { ...user, nearAccount: nearAccountId }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });

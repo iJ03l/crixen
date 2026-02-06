@@ -1,4 +1,4 @@
-# Crixen SaaS Platform 🚀
+# Crixen SaaS Platform
 
 **The Ultimate Social Media AI Agent.**
 
@@ -6,58 +6,69 @@ Crixen is a centralized SaaS ecosystem designed to scale with your brand. It con
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 
 The project is divided into three interconnected components:
 
-### 1. 🧠 Crixen API (`/crixen-api`)
+### 1. Crixen API (`/crixen-api`)
 **The Central Nervous System.**
 *   **Tech**: Node.js, Express, PostgreSQL.
-*   **Role**: Handles authentication, database interactions, and acts as the secure proxy for AI operations.
+*   **Role**: Handles authentication, database interactions, and acts as the secure proxy for AI and storage operations.
 *   **Key Features**:
     *   **Secure AI Proxy**: Routes requests to NEAR AI using system-level API keys.
     *   **Centralized Auth**: JWT-based authentication synced across web and extension.
+    *   **NOVA Integration**: Zero-knowledge encrypted storage with invisible NEAR account creation.
 
-### 2. 🎛 Crixen Dashboard (`/crixen-web`)
+### 2. Crixen Dashboard (`/crixen-web`)
 **The Command Center.**
 *   **Tech**: React, Vite, TailwindCSS, Lucide React.
 *   **Role**: A web-based dashboard for users to manage subscriptions, stats, and brand strategies.
 *   **Key Features**:
+    *   **Strategy Brain**: Create and manage brand voices and strategies per project.
     *   **Usage Tracking**: Visualize API usage and limits.
     *   **Billing**: Manage subscriptions (Starter, Pro, Agency).
-    *   **Strategy Hub**: Create and edit brand "Brains" (Strategy Docs).
 
-### 3. 🧩 Crixen Extension (`/crixen-extension`)
+### 3. Crixen Extension (`/crixen-extension`)
 **The Agent in the Field.**
 *   **Tech**: Chrome Extension (Manifest V3), Vanilla JS.
 *   **Role**: Overlays AI assistance onto social platforms (Instagram, X/Twitter, Notion).
 *   **Key Features**:
     *   **Zero-Config Auth**: Automatically syncs login state from the Dashboard.
+    *   **Notion Capture**: Scrape strategies from Notion tables and sync to cloud.
     *   **Local Execution**: Runs fast by caching strategy locally.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 🔐 Seamless Authentication
+### Seamless Authentication
 No more copying API keys.
 1.  Log in to the **Crixen Dashboard**.
 2.  Open the **Extension**.
 3.  It automatically detects your session and logs you in.
 
-### 💎 Tiered SaaS Model
-*   **Starter (Free)**: 1 Project. Basic usage.
-*   **Pro ($10/mo)**: 3 Projects. 1500 Gens/day. Priority Support.
-*   **Agency ($100/mo)**: Unlimited Projects. Unlimited Gens. Dedicated Account Manager.
+### NOVA Encrypted Storage (Active on Mainnet)
+Secure, zero-knowledge storage for sensitive brand strategies.
+*   **Architecture**: Strategies & Brand Voices are encrypted client-side (server acts as client) and uploaded to **IPFS** via **NOVA SDK**.
+*   **Database Masking**: The SQL database **NEVER** stores plain text strategies. It stores masked placeholders (e.g., `**SECURED ON NOVA**`) while real data lives on IPFS.
+*   **Platform-Managed Security**: Uses the platform's NEAR Mainnet account (`ij03l.nova-sdk.near`) to authorize secure uploads, removing the need for users to manage wallets.
+
+### Tiered SaaS Model
+| Tier | Projects | Strategies/Project | NOVA Storage |
+|------|----------|-------------------|--------------|
+| **Starter (Free)** | 1 | 3 | Encrypted |
+| **Pro ($10/mo)** | 3 | 10 | Encrypted |
+| **Agency ($100/mo)** | Unlimited | Unlimited | Encrypted |
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### Prerequisites
-*   Node.js & pnpm
+*   Node.js (v20+) & pnpm
 *   PostgreSQL Database
 *   NEAR AI API Key (System Level)
+*   NEAR Master Account (for NOVA - optional)
 
 ### 1. Start the API
 ```bash
@@ -87,7 +98,7 @@ pnpm dev
 
 ---
 
-## 📜 Configuration
+## Configuration
 
 ### API (`crixen-api/.env`)
 ```ini
@@ -95,6 +106,12 @@ PORT=3000
 DATABASE_URL=postgres://...
 JWT_SECRET=your_secret
 NEAR_AI_API_KEY=sk-...
+
+# NOVA Integration (Mainnet)
+NEAR_MASTER_ACCOUNT_ID=ij03l.nova-sdk.near
+NOVA_API_KEY=nova_sk_...
+ENCRYPTION_SECRET=32-byte-hex-secret
+NOVA_USE_TESTNET=false
 ```
 
 ### Extension Configuration
@@ -105,5 +122,5 @@ To change this for local development:
 
 ---
 
-**Version**: 2.0.0
+**Version**: 2.1.0
 **License**: Proprietary

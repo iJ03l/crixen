@@ -22,7 +22,9 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
+    "near-api-js": "^4.0.0",
     "node-cron": "^3.0.3",
+    "nova-sdk-js": "^1.0.0",
     "pg": "^8.18.0",
     "resend": "^6.9.1",
     "uuid": "^9.0.1"
