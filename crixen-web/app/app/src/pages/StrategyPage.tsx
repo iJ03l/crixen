@@ -42,6 +42,10 @@ export default function StrategyPage() {
     const [addingProject, setAddingProject] = useState(false);
     const [newProjectName, setNewProjectName] = useState('');
 
+    // Loading states for actions
+    const [isSavingBrandVoice, setIsSavingBrandVoice] = useState(false);
+    const [isSavingStrategy, setIsSavingStrategy] = useState(false);
+
     useEffect(() => {
         loadProjects();
     }, []);
@@ -104,17 +108,21 @@ export default function StrategyPage() {
     const saveBrandVoice = async () => {
         if (!selectedProject) return;
         try {
+            setIsSavingBrandVoice(true);
             await api.projects.updateBrandVoice(selectedProject.id, brandVoiceText);
             setSelectedProject({ ...selectedProject, brand_voice: brandVoiceText });
             setEditingBrandVoice(false);
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setIsSavingBrandVoice(false);
         }
     };
 
     const addStrategy = async () => {
         if (!selectedProject || !newStrategy.name || !newStrategy.prompt) return;
         try {
+            setIsSavingStrategy(true);
             const result = await api.projects.addStrategy(selectedProject.id, {
                 ...newStrategy,
                 source: 'manual'
@@ -124,6 +132,8 @@ export default function StrategyPage() {
             setNewStrategyMode(false);
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setIsSavingStrategy(false);
         }
     };
 
@@ -140,6 +150,7 @@ export default function StrategyPage() {
     const updateStrategy = async (strategy: Strategy) => {
         if (!selectedProject) return;
         try {
+            setIsSavingStrategy(true);
             const updatedStrategies = selectedProject.strategies.map(s =>
                 s.id === strategy.id ? strategy : s
             );
@@ -148,6 +159,8 @@ export default function StrategyPage() {
             setEditingStrategy(null);
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setIsSavingStrategy(false);
         }
     };
 
@@ -375,9 +388,19 @@ export default function StrategyPage() {
                                 <div className="flex gap-2">
                                     <button
                                         onClick={saveBrandVoice}
-                                        className="flex items-center gap-1 text-sm text-green-400 hover:text-green-300"
+                                        disabled={isSavingBrandVoice}
+                                        className="flex items-center gap-1 text-sm text-green-400 hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <Save size={14} /> Save
+                                        {isSavingBrandVoice ? (
+                                            <>
+                                                <div className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save size={14} /> Save
+                                            </>
+                                        )}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -452,10 +475,17 @@ export default function StrategyPage() {
                                     </button>
                                     <button
                                         onClick={addStrategy}
-                                        disabled={!newStrategy.name || !newStrategy.prompt}
-                                        className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                                        disabled={!newStrategy.name || !newStrategy.prompt || isSavingStrategy}
+                                        className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center gap-2"
                                     >
-                                        Create Strategy
+                                        {isSavingStrategy ? (
+                                            <>
+                                                <div className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                Creating...
+                                            </>
+                                        ) : (
+                                            'Create Strategy'
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -481,8 +511,14 @@ export default function StrategyPage() {
                                                 onChange={(e) => setEditingStrategy({ ...editingStrategy, prompt: e.target.value })}
                                                 className="w-full h-20 bg-black/50 border border-white/10 rounded px-2 py-1 text-white text-xs resize-none"
                                             />
-                                            <div className="flex gap-2">
-                                                <button onClick={() => updateStrategy(editingStrategy)} className="text-green-400 text-xs">Save</button>
+                                            <div className="flex gap-2 items-center">
+                                                <button
+                                                    onClick={() => updateStrategy(editingStrategy)}
+                                                    disabled={isSavingStrategy}
+                                                    className="text-green-400 text-xs disabled:opacity-50"
+                                                >
+                                                    {isSavingStrategy ? 'Saving...' : 'Save'}
+                                                </button>
                                                 <button onClick={() => setEditingStrategy(null)} className="text-gray-400 text-xs">Cancel</button>
                                             </div>
                                         </div>

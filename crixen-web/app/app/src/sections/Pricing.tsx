@@ -121,7 +121,7 @@ const Pricing = () => {
         'Team collaboration',
         'Dedicated account manager',
       ],
-      cta: 'Contact sales',
+      cta: 'Get started',
       highlighted: false,
     },
   ];
