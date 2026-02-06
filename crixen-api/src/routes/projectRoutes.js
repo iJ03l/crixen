@@ -89,6 +89,11 @@ async function getProjectWithUnifiedData(project, user) {
         brand_voice = project.brand_voice || '';
     }
 
+    // FINAL SAFETY CHECK: Never leak the mask string to the frontend
+    if (brand_voice === '**SECURED ON NOVA**') {
+        brand_voice = '';
+    }
+
     return {
         ...project,
         strategies,
@@ -199,19 +204,33 @@ async function saveProjectData(user, projectId, strategies, brandVoice, dbProjec
         brand_voice: brandVoice
     });
 
-    let novaCid = null;
-    if (novaResult) {
-        novaCid = novaResult.cid;
+    if (!novaResult || !novaResult.cid) {
+        throw new Error('Secure upload to NOVA failed. Database update aborted to prevent data loss.');
     }
+
+    const novaCid = novaResult.cid;
 
     // 2. Update Database (Masked)
     // We store empty placeholders to keep counts working but hide content
-    const maskedStrategies = strategies.map(() => ({}));
+    // Note: We use an empty object {} for strategies so array length is preserved for stats
+    const maskedStrategies = strategies.map(s => ({
+        id: s.id,
+        created_at: s.created_at,
+        // Keep name for generic UI lists if needed, or mask it too?
+        // User requirements say "prevent sensitive data". Names are usually ok, prompts are sensitive.
+        // But for maximum security, let's keep only structural IDs.
+        // Actually, sidebar uses names. If we mask names, sidebar breaks.
+        // Let's keep names in DB for now (metadata), but mask prompts/content.
+        name: s.name,
+        source: s.source
+    }));
+
+    // Mask brand voice completely
     const maskedBrandVoice = '**SECURED ON NOVA**';
 
     const result = await db.query(
         `UPDATE projects 
-         SET strategies = $1, brand_voice = $2, nova_cid = $3, updated_at = CURRENT_TIMESTAMP 
+         SET strategies = $1, brand_voice = $2, nova_cid = $3, strategies_cid = $3, updated_at = CURRENT_TIMESTAMP 
          WHERE id = $4 AND user_id = $5 
          RETURNING *`,
         [JSON.stringify(maskedStrategies), maskedBrandVoice, novaCid, projectId, user.id]
