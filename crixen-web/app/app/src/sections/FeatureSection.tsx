@@ -1,7 +1,7 @@
 import { useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Send, MessageSquare, Instagram, Twitter, Linkedin, FileText, PlusCircle } from 'lucide-react';
+import { ArrowRight, Send, MessageSquare, Instagram, Twitter, FileText, PlusCircle } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -137,8 +137,8 @@ const FeatureSection = ({
                 <div
                   key={i}
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all ${tone.active
-                      ? 'bg-dark-silver/10 border-dark-silver/30'
-                      : 'bg-white/[0.03] border-white/[0.05]'
+                    ? 'bg-dark-silver/10 border-dark-silver/30'
+                    : 'bg-white/[0.03] border-white/[0.05]'
                     }`}
                 >
                   <span
@@ -186,8 +186,8 @@ const FeatureSection = ({
                   </div>
                   <span
                     className={`text-xs font-mono ${platform.connected
-                        ? 'text-green-400'
-                        : 'text-dark-silver'
+                      ? 'text-green-400'
+                      : 'text-dark-silver'
                       }`}
                   >
                     {platform.status}

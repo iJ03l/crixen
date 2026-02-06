@@ -1,4 +1,4 @@
-import { Briefcase, User, FileText, Zap, Layers, Smile, Target, Sparkles, BookOpen } from 'lucide-react';
+import { Briefcase, User, Zap, Layers, Smile, Target, Sparkles, BookOpen } from 'lucide-react';
 
 export default function StrategyPage() {
     return (
