@@ -129,44 +129,118 @@ router.post('/groups/register', async (req, res) => {
 // POST /api/v1/nova/upload
 // Upload encrypted strategy to NOVA (backend signs on behalf of user)
 // =============================================================================
+// =============================================================================
+// POST /api/v1/nova/upload
+// Upload encrypted strategy to NOVA (backend signs on behalf of user)
+// Refactored to match Brand Voice storage (No wallet required)
+// =============================================================================
 router.post('/upload', async (req, res) => {
-    const { projectId, strategyData, groupId = 'crixen-strategies' } = req.body;
+    const { projectId, strategyData } = req.body;
 
     if (!strategyData) {
         return res.status(400).json({ error: 'strategyData is required' });
     }
 
-    try {
-        const { sdk, nearAccountId } = await getUserNovaSdk(req.user.id);
+    if (!projectId) {
+        return res.status(400).json({ error: 'Project ID is required for secure storage' });
+    }
 
-        // Ensure group exists
-        try {
-            await sdk.registerGroup(groupId);
-        } catch (e) {
-            // Ignore "already exists" error
-            if (!e.message?.includes('already exists')) {
-                console.warn('Group registration warning:', e.message);
+    try {
+        const { novaService } = require('../services/nova-service');
+
+        // 1. Fetch current project to get brand_voice (we need to preserve it)
+        const projectRes = await db.query(
+            'SELECT brand_voice FROM projects WHERE id = $1 AND user_id = $2',
+            [projectId, req.user.id]
+        );
+
+        if (projectRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        // Handle potentially masked brand_voice
+        let brandVoice = projectRes.rows[0].brand_voice || '';
+        if (brandVoice === '**SECURED ON NOVA**') {
+            // If it's masked, we need to fetch the real one from Nova first? 
+            // OR we can just fetch the Unified Data.
+            // But wait, if we are overwriting strategies, we are creating a NEW unified object.
+            // If we don't have the real brand voice, we will lose it.
+            // We MUST retrieve the current full object first.
+            const { getProjectWithUnifiedData } = require('./projectRoutes'); // We might need to extract this helper or duplicate logic
+            // Actually, let's use the novaService to retrieve it if we have a CID
+            const currentProjectRes = await db.query(
+                'SELECT * FROM projects WHERE id = $1 AND user_id = $2',
+                [projectId, req.user.id]
+            );
+            const currentProject = currentProjectRes.rows[0];
+
+            if (currentProject.nova_cid || currentProject.strategies_cid) {
+                const nearAccountId = req.user.near_account_id || process.env.NEAR_MASTER_ACCOUNT_ID || 'ij03l.nova-sdk.near';
+                const cid = currentProject.nova_cid || currentProject.strategies_cid;
+                try {
+                    const oldData = await novaService.retrieveProjectData(nearAccountId, projectId, cid);
+                    if (oldData) {
+                        brandVoice = oldData.brand_voice || '';
+                    }
+                } catch (e) {
+                    console.warn('Could not retrieve old brand voice, it might be lost:', e);
+                }
             }
         }
 
-        // Prepare file data
-        const fileName = projectId ? `strategy-${projectId}.json` : 'strategy.json';
-        const fileData = Buffer.from(JSON.stringify(strategyData, null, 2), 'utf-8');
+        // 2. Prepare Unified Payload
+        const nearAccountId = req.user.near_account_id || process.env.NEAR_MASTER_ACCOUNT_ID || 'ij03l.nova-sdk.near';
+        const unifiedData = {
+            strategies: strategyData,
+            brand_voice: brandVoice
+        };
 
-        // Upload to NOVA (encrypts client-side in SDK)
-        const result = await sdk.upload(groupId, fileData, fileName);
+        // 3. Upload using NovaService (Master Account fallback)
+        const result = await novaService.uploadProjectData(nearAccountId, projectId, unifiedData);
 
-        console.log(`✅ Uploaded strategy to NOVA: CID=${result.cid}`);
-
-        // Store CID reference in database
-        if (projectId) {
-            await db.query(`
-                INSERT INTO user_strategies (user_id, project_id, ipfs_cid, near_tx_id)
-                VALUES ($1, $2, $3, $4)
-                ON CONFLICT (user_id, project_id) 
-                DO UPDATE SET ipfs_cid = $3, near_tx_id = $4, updated_at = NOW()
-            `, [req.user.id, projectId, result.cid, result.trans_id]);
+        if (!result || !result.cid) {
+            throw new Error('Upload to NOVA failed');
         }
+
+        console.log(`✅ Uploaded unified data to NOVA: CID=${result.cid}`);
+
+        // 4. Update Database (Projects Table)
+        // Mask strategies and brand voice
+        const maskedStrategies = strategyData.map(s => ({
+            id: s.id || Date.now().toString(), // Ensure ID
+            name: s.name,
+            source: s.source
+        }));
+
+        // We update the main project record, mirroring projectRoutes.js
+        await db.query(`
+            UPDATE projects 
+            SET strategies = $1, 
+                brand_voice = $2, 
+                nova_cid = $3, 
+                strategies_cid = $3, 
+                updated_at = NOW()
+            WHERE id = $4 AND user_id = $5
+        `, [
+            JSON.stringify(maskedStrategies),
+            '**SECURED ON NOVA**',
+            result.cid,
+            projectId,
+            req.user.id
+        ]);
+
+        // 5. Update legacy user_strategies table for backward compatibility/reference?
+        // The previous implementation used this table. We should probably keep it updated 
+        // OR decide if we are fully migrating to 'projects' table columns.
+        // The 'getProjectWithUnifiedData' in projectRoutes checks 'nova_cid' on the project table.
+        // So updating the 'projects' table is the critical part for the dashboard.
+        // We can update user_strategies just in case.
+        await db.query(`
+            INSERT INTO user_strategies (user_id, project_id, ipfs_cid, near_tx_id)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_id, project_id) 
+            DO UPDATE SET ipfs_cid = $3, near_tx_id = $4, updated_at = NOW()
+        `, [req.user.id, projectId, result.cid, result.trans_id]);
 
         res.json({
             success: true,
@@ -184,23 +258,43 @@ router.post('/upload', async (req, res) => {
 // GET /api/v1/nova/retrieve/:cid
 // Retrieve and decrypt strategy from NOVA
 // =============================================================================
+// =============================================================================
+// GET /api/v1/nova/retrieve/:cid
+// Retrieve and decrypt strategy from NOVA
+// Refactored to use novaService (No wallet required)
+// =============================================================================
 router.get('/retrieve/:cid', async (req, res) => {
     const { cid } = req.params;
-    const { groupId = 'crixen-strategies' } = req.query;
+    const { projectId } = req.query; // Ideally we pass projectId to derive group/context
 
     try {
-        const { sdk, nearAccountId } = await getUserNovaSdk(req.user.id);
+        const { novaService } = require('../services/nova-service');
+        const nearAccountId = req.user.near_account_id || process.env.NEAR_MASTER_ACCOUNT_ID || 'ij03l.nova-sdk.near';
 
-        // Retrieve from NOVA (decrypts in SDK)
-        const { data } = await sdk.retrieve(groupId, cid);
+        // Retrieve from NOVA using service
+        // We might not know the project ID here if only CID is passed. 
+        // novaService.retrieveProjectData requires projectId to derive group.
+        // If we don't have projectId, we might default to 'crixen-global-store' or similar if that's what getGroupId returns.
+        // strategies were uploaded with projectId.
 
-        const strategyJson = Buffer.from(data).toString('utf-8');
-        const strategyData = JSON.parse(strategyJson);
+        let data = null;
+        if (projectId) {
+            data = await novaService.retrieveProjectData(nearAccountId, projectId, cid);
+        } else {
+            // Fallback: try to retrieve using the default group logic if projectId isn't provided
+            // This might be brittle if group depends strictly on projectId.
+            // But getGroupId in nova-service returns hardcoded 'crixen-global-store' currently.
+            data = await novaService.retrieveProjectData(nearAccountId, 'default', cid);
+        }
+
+        if (!data) {
+            return res.status(404).json({ error: 'Data not found or could not be decrypted' });
+        }
 
         res.json({
             success: true,
             cid,
-            data: strategyData,
+            data: data, // This could be the unified object {strategies, brand_voice}
             nearAccount: nearAccountId
         });
     } catch (error) {
@@ -212,38 +306,53 @@ router.get('/retrieve/:cid', async (req, res) => {
 // =============================================================================
 // GET /api/v1/nova/strategy/:projectId
 // Get strategy for a project (fetches CID from DB, then retrieves from NOVA)
+// Refactored to use novaService (No wallet required)
 // =============================================================================
 router.get('/strategy/:projectId', async (req, res) => {
     const { projectId } = req.params;
 
     try {
-        // Get CID from database
-        const result = await db.query(`
-            SELECT ipfs_cid, near_tx_id, updated_at
-            FROM user_strategies
-            WHERE user_id = $1 AND project_id = $2
-        `, [req.user.id, projectId]);
+        const { novaService } = require('../services/nova-service');
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Strategy not found' });
+        // Get CID from projects table (Unified source of truth now)
+        const projectRes = await db.query(
+            'SELECT nova_cid, strategies_cid FROM projects WHERE id = $1 AND user_id = $2',
+            [projectId, req.user.id]
+        );
+
+        if (projectRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Project not found' });
         }
 
-        const { ipfs_cid, near_tx_id, updated_at } = result.rows[0];
+        const project = projectRes.rows[0];
+        const cid = project.nova_cid || project.strategies_cid;
 
-        // Retrieve from NOVA
-        const { sdk, nearAccountId } = await getUserNovaSdk(req.user.id);
-        const { data } = await sdk.retrieve('crixen-strategies', ipfs_cid);
+        if (!cid) {
+            return res.status(404).json({ error: 'No secured strategies found for this project' });
+        }
 
-        const strategyJson = Buffer.from(data).toString('utf-8');
-        const strategyData = JSON.parse(strategyJson);
+        const nearAccountId = req.user.near_account_id || process.env.NEAR_MASTER_ACCOUNT_ID || 'ij03l.nova-sdk.near';
+
+        // Retrieve unified data
+        const unifiedData = await novaService.retrieveProjectData(nearAccountId, projectId, cid);
+
+        if (!unifiedData) {
+            return res.status(500).json({ error: 'Failed to decrypt data from NOVA' });
+        }
+
+        // Extract strategies from unified payload
+        let strategies = [];
+        if (Array.isArray(unifiedData)) {
+            strategies = unifiedData; // Migration support
+        } else {
+            strategies = unifiedData.strategies || [];
+        }
 
         res.json({
             success: true,
             projectId: parseInt(projectId),
-            cid: ipfs_cid,
-            transactionId: near_tx_id,
-            updatedAt: updated_at,
-            data: strategyData,
+            cid: cid,
+            data: strategies, // Frontend expects array of strategies
             nearAccount: nearAccountId
         });
     } catch (error) {

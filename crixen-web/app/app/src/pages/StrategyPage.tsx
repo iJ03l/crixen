@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Briefcase, Plus, Edit3, Trash2, Save, X, BookOpen, Sparkles, PenTool, Crown, ChevronRight, Target, FileText, Lightbulb } from 'lucide-react';
+import { Briefcase, Plus, Edit3, Trash2, Save, X, BookOpen, Sparkles, PenTool, Crown, ChevronRight, Target, FileText, Lightbulb, Shield } from 'lucide-react';
 import { api } from '../services/api';
 
 interface Strategy {
@@ -45,6 +45,7 @@ export default function StrategyPage() {
     // Loading states for actions
     const [isSavingBrandVoice, setIsSavingBrandVoice] = useState(false);
     const [isSavingStrategy, setIsSavingStrategy] = useState(false);
+    const [isNovaSecured, setIsNovaSecured] = useState(false);
 
     useEffect(() => {
         loadProjects();
@@ -70,8 +71,38 @@ export default function StrategyPage() {
 
     const selectProject = async (id: number) => {
         try {
+            // 1. Get standard project data
             const project = await api.projects.getById(id);
+
+            // 2. Try to get secure Nova data
+            let novaStrategies = [];
+            let secured = false;
+            try {
+                const novaResult = await api.nova.retrieveStrategy(id);
+                if (novaResult && novaResult.data) {
+                    // Update: Backend now returns unified data OR strategies array
+                    if (Array.isArray(novaResult.data)) {
+                        novaStrategies = novaResult.data;
+                    } else if (novaResult.data.strategies) {
+                        novaStrategies = novaResult.data.strategies;
+                    }
+
+                    if (novaStrategies.length > 0) {
+                        secured = true;
+                        console.log('✅ Loaded secured strategies from Nova');
+                    }
+                }
+            } catch (e) {
+                console.warn('Nova fetch failed, using standard DB:', e);
+            }
+
+            // 3. Merge/Override strategies if Nova data exists
+            if (secured) {
+                project.strategies = novaStrategies;
+            }
+
             setSelectedProject(project);
+            setIsNovaSecured(secured);
             setBrandVoiceText(project.brand_voice || '');
             setProjectNameText(project.name || '');
             setEditingProjectName(false);
@@ -437,6 +468,11 @@ export default function StrategyPage() {
                             <h2 className="font-bold text-base md:text-lg text-white flex items-center gap-2">
                                 <FileText size={16} className="text-purple-400" />
                                 Strategies ({(selectedProject.strategies || []).length}/{limits.maxStrategiesPerProject === Infinity ? '∞' : limits.maxStrategiesPerProject})
+                                {isNovaSecured && (
+                                    <span className="ml-2 flex items-center gap-1 text-xs px-2 py-0.5 bg-green-500/20 text-green-300 rounded-full border border-green-500/30">
+                                        <Shield size={10} /> Secured by Nova
+                                    </span>
+                                )}
                             </h2>
                             <button
                                 onClick={() => setNewStrategyMode(true)}
