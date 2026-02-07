@@ -90,8 +90,13 @@ export default function StrategyPage() {
                     }
 
                     if (novaStrategies.length > 0) {
-                        secured = true;
-                        console.log('✅ Loaded secured strategies from Nova');
+                        // FILTER OUT NULLS/INVALID DATA
+                        novaStrategies = novaStrategies.filter((s: any) => s && s.name);
+
+                        if (novaStrategies.length > 0) {
+                            secured = true;
+                            console.log('✅ Loaded secured strategies from Nova');
+                        }
                     }
                 }
             } catch (e) {
