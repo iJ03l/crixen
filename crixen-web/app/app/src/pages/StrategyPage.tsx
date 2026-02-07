@@ -110,6 +110,8 @@ export default function StrategyPage() {
             setEditingProjectName(false);
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setProjectLoading(false);
         }
     };
 
