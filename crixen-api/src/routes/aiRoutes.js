@@ -30,6 +30,7 @@ router.post('/generate', async (req, res) => {
         }
 
         // 2. Call NEAR AI
+        const maxTokens = req.body.maxTokens || 500; // Allow Notion tools to request more tokens
         const response = await fetch('https://cloud-api.near.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -42,7 +43,7 @@ router.post('/generate', async (req, res) => {
                     { role: 'system', content: 'You are Crixen AI.' },
                     { role: 'user', content: `Context: ${context}\n\nPrompt: ${prompt}` }
                 ],
-                max_tokens: 500
+                max_tokens: maxTokens
             })
         });
 
