@@ -10,14 +10,6 @@ interface Strategy {
     created_at: string;
 }
 
-interface Project {
-    id: number;
-    name: string;
-    brand_voice: string;
-    strategies: Strategy[];
-    strategy_count: number;
-}
-
 export default function StrategyPage() {
     const {
         projects,
@@ -55,8 +47,7 @@ export default function StrategyPage() {
         setEditingProjectName,
         setProjectNameText,
         setAddingProject,
-        setNewProjectName,
-        setError
+        setNewProjectName
     } = useStrategyStore();
 
     useEffect(() => {

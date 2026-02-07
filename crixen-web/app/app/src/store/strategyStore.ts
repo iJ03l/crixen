@@ -204,7 +204,7 @@ export const useStrategyStore = create<StrategyState>((set, get) => ({
         if (!selectedProject || !projectNameText.trim()) return;
 
         try {
-            await api.projects.update(selectedProject.id, { name: projectNameText });
+            await api.projects.updateName(selectedProject.id, projectNameText);
             set({ editingProjectName: false });
             await loadProjects();
             // Update local selected project name immediately for UX
