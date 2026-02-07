@@ -46,6 +46,7 @@ export default function StrategyPage() {
     const [isSavingBrandVoice, setIsSavingBrandVoice] = useState(false);
     const [isSavingStrategy, setIsSavingStrategy] = useState(false);
     const [isNovaSecured, setIsNovaSecured] = useState(false);
+    const [projectLoading, setProjectLoading] = useState(false);
 
     useEffect(() => {
         loadProjects();
@@ -71,6 +72,7 @@ export default function StrategyPage() {
 
     const selectProject = async (id: number) => {
         try {
+            setProjectLoading(true);
             // 1. Get standard project data
             const project = await api.projects.getById(id);
 
@@ -141,11 +143,10 @@ export default function StrategyPage() {
         try {
             setIsSavingBrandVoice(true);
             await api.projects.updateBrandVoice(selectedProject.id, brandVoiceText);
-            setSelectedProject({ ...selectedProject, brand_voice: brandVoiceText });
-            setEditingBrandVoice(false);
+            // Reload page to ensure data consistency
+            window.location.reload();
         } catch (err: any) {
             setError(err.message);
-        } finally {
             setIsSavingBrandVoice(false);
         }
     };
@@ -154,16 +155,14 @@ export default function StrategyPage() {
         if (!selectedProject || !newStrategy.name || !newStrategy.prompt) return;
         try {
             setIsSavingStrategy(true);
-            const result = await api.projects.addStrategy(selectedProject.id, {
+            await api.projects.addStrategy(selectedProject.id, {
                 ...newStrategy,
                 source: 'manual'
             });
-            setSelectedProject(result.project);
-            setNewStrategy({ name: '', prompt: '' });
-            setNewStrategyMode(false);
+            // Reload page to ensure data consistency
+            window.location.reload();
         } catch (err: any) {
             setError(err.message);
-        } finally {
             setIsSavingStrategy(false);
         }
     };
@@ -171,8 +170,9 @@ export default function StrategyPage() {
     const deleteStrategy = async (strategyId: string) => {
         if (!selectedProject) return;
         try {
-            const result = await api.projects.deleteStrategy(selectedProject.id, strategyId);
-            setSelectedProject(result);
+            await api.projects.deleteStrategy(selectedProject.id, strategyId);
+            // Reload page to ensure data consistency
+            window.location.reload();
         } catch (err: any) {
             setError(err.message);
         }
@@ -185,12 +185,11 @@ export default function StrategyPage() {
             const updatedStrategies = selectedProject.strategies.map(s =>
                 s.id === strategy.id ? strategy : s
             );
-            const result = await api.projects.updateStrategies(selectedProject.id, updatedStrategies);
-            setSelectedProject(result);
-            setEditingStrategy(null);
+            await api.projects.updateStrategies(selectedProject.id, updatedStrategies);
+            // Reload page to ensure data consistency
+            window.location.reload();
         } catch (err: any) {
             setError(err.message);
-        } finally {
             setIsSavingStrategy(false);
         }
     };
@@ -253,6 +252,32 @@ export default function StrategyPage() {
             </div>
         );
     }
+
+    // Render helper for Skeleton when switching projects
+    const renderProjectSkeleton = () => (
+        <div className="space-y-4 md:space-y-6 animate-pulse">
+            {/* Project Header Skeleton */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-6">
+                <div className="h-8 w-48 bg-white/10 rounded"></div>
+            </div>
+
+            {/* Brand Voice Skeleton */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-6">
+                <div className="h-6 w-32 bg-white/10 rounded mb-4"></div>
+                <div className="h-24 w-full bg-white/5 rounded-lg"></div>
+            </div>
+
+            {/* Strategies Skeleton */}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-6">
+                <div className="h-6 w-32 bg-white/10 rounded mb-4"></div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="h-32 bg-white/5 rounded-lg"></div>
+                    <div className="h-32 bg-white/5 rounded-lg"></div>
+                    <div className="h-32 bg-white/5 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="max-w-6xl mx-auto space-y-4 md:space-y-6 animate-fade-in px-4 md:px-0">
@@ -350,7 +375,7 @@ export default function StrategyPage() {
                 </div>
             </div>
 
-            {selectedProject && (
+            {projectLoading ? renderProjectSkeleton() : (selectedProject && (
                 <>
                     {/* Project Header with Editable Name */}
                     <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-6">
@@ -609,7 +634,7 @@ export default function StrategyPage() {
                         <ChevronRight className="text-gray-400 ml-auto" />
                     </div>
                 </>
-            )}
+            ))}
         </div>
     );
 }

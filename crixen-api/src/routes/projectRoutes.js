@@ -340,28 +340,31 @@ router.delete('/:id/strategies/:strategyId', async (req, res) => {
     const user = req.user;
 
     try {
-        const projectRes = await db.query(
-            'SELECT strategies FROM projects WHERE id = $1 AND user_id = $2',
-            [id, user.id]
-        );
+        // 1. Get current full state (need brand_voice to re-bundle)
+        const projectRes = await db.query('SELECT * FROM projects WHERE id = $1 AND user_id = $2', [id, user.id]);
+        if (projectRes.rows.length === 0) return res.status(404).json({ error: 'Project not found' });
 
-        if (projectRes.rows.length === 0) {
-            return res.status(404).json({ error: 'Project not found' });
-        }
+        const fullProject = await getProjectWithUnifiedData(projectRes.rows[0], user);
 
-        const currentStrategies = projectRes.rows[0].strategies || [];
+        const currentStrategies = fullProject.strategies || [];
         const updatedStrategies = currentStrategies.filter(s => s.id !== strategyId);
 
         if (updatedStrategies.length === currentStrategies.length) {
             return res.status(404).json({ error: 'Strategy not found' });
         }
 
-        const result = await db.query(
-            'UPDATE projects SET strategies = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
-            [JSON.stringify(updatedStrategies), id, user.id]
-        );
+        // 2. Save with updated strategies, keeping existing brand voice
+        await saveProjectData(user, id, updatedStrategies, fullProject.brand_voice);
 
-        res.json(result.rows[0]);
+        // 3. Return updated project data (or just success)
+        // The frontend expects the updated project or strategy list usually.
+        // Returning the updated project row from DB (which saveProjectData does) might be masked.
+        // We should return the unmasked data structure.
+
+        res.json({
+            ...fullProject,
+            strategies: updatedStrategies
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to delete strategy' });
