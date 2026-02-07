@@ -8,7 +8,7 @@ const { NovaSdk } = require('nova-sdk-js');
 class NovaService {
     constructor() {
         this.sdkCache = new Map(); // Cache SDK instances per user
-        this.knownGroups = new Set(); // Cache known existing groups
+        this.knownGroups = new Set(['crixen-global-store']); // Cache known existing groups
         this.initialized = false;
     }
 
