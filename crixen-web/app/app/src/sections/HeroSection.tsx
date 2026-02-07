@@ -160,7 +160,7 @@ const HeroSection = () => {
 
               <div className="flex flex-wrap items-center gap-4 mt-6 lg:mt-8">
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/changelog')}
                   className="btn-primary flex items-center gap-2"
                 >
                   <Sparkles size={18} />
