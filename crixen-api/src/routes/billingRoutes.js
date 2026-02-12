@@ -78,10 +78,11 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
         const payload = {
             amount: amountInSmallestUnit,
             asset: {
-                assetId: "nep141:usdc.near"
+                chain: "NEAR",
+                symbol: "USDC"
             },
             recipient: {
-                address: process.env.NEAR_MASTER_ACCOUNT_ID,
+                address: process.env.TREASURY_ACCOUNT_ID || process.env.NEAR_MASTER_ACCOUNT_ID,
                 chainId: "near-mainnet"
             },
             successUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=success`,
