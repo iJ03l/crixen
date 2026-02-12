@@ -65,10 +65,15 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
     }
 
     try {
-        const pingpayKey = process.env.PINGPAY_PUBLISHABLE_KEY;
+        let pingpayKey = process.env.PINGPAY_PUBLISHABLE_KEY;
         if (!pingpayKey) {
             throw new Error('Server misconfiguration: Missing Pingpay Key');
         }
+
+        // Clean the key (remove quotes, whitespace) to avoid env var issues
+        pingpayKey = pingpayKey.replace(/["']/g, '').trim();
+
+        console.log(`[Pingpay] Using Key: ${pingpayKey.substring(0, 8)}... (Length: ${pingpayKey.length})`);
 
         // Pingpay Hosted Checkout Flow (Mainnet)
         // Asset: USDC (nep141:usdc.near) - 6 Decimals
