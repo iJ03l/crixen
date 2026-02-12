@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { api } from "@/services/api";
@@ -48,7 +48,7 @@ const PLANS = [
             "Team collaboration",
             "Dedicated account manager"
         ],
-        itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5", // TODO: Get Agency Item ID
+        itemId: "2b92641315835c432360ebc220cac4b901614764b85ce81dfbe1688688461749", // SHA256('agency_tier')
         amount: "100.00"
     }
 ];
@@ -63,9 +63,29 @@ export default function SettingsPage() {
     const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const paymentStatus = params.get('payment');
+
+        if (paymentStatus === 'success') {
+            // Hard refresh to update user tier as requested
+            window.location.href = window.location.pathname;
+        } else if (paymentStatus === 'canceled') {
+            setError('Payment was canceled.');
+            // Clear URL params without refresh
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
+
     const handleUpgradeClick = (plan: any) => {
-        if (!plan.itemId || !user) return;
+        console.log('[Settings] Upgrade clicked for:', plan.id);
+        if (!plan.itemId || !user) {
+            console.error('[Settings] Missing itemId or user');
+            return;
+        }
         const currentTier = (user.tier as string) === 'free' ? 'starter' : user.tier;
+        console.log('[Settings] Current Tier:', currentTier);
+
         if (plan.id === currentTier) return;
 
         setSelectedPlan(plan);
