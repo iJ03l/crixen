@@ -1,5 +1,5 @@
 import { useEffect, useRef, useLayoutEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Play, Sparkles } from 'lucide-react';
@@ -12,7 +12,7 @@ const HeroSection = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // Load animation (on mount)
   useEffect(() => {
