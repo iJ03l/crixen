@@ -100,7 +100,9 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-publishable-key': pingpayKey
+                'x-publishable-key': pingpayKey,
+                'x-api-key': pingpayKey,
+                'Authorization': `Bearer ${pingpayKey}`
             },
             body: JSON.stringify(payload)
         });
