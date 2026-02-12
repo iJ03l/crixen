@@ -114,13 +114,10 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
         }
 
         const data = await response.json();
-        // data.sessionUrl should be the redirect link? Or data.url? 
-        // Docs example text says "retrieve the sessionUrl".
-        // Let's assume the response body structure isn't effectively documented but typically:
-        // { sessionId: "...", url: "..." } or similar.
-        // I will fallback to data.url or construct it if needed.
 
-        const sessionId = data.sessionId || data.id; // Try to resolve ID
+        console.log('[Pingpay] Session Response:', JSON.stringify(data, null, 2));
+
+        const sessionId = data.session?.sessionId || data.sessionId || data.id;
         const redirectUrl = data.sessionUrl || data.url;
 
         if (!sessionId) {
