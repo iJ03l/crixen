@@ -148,6 +148,21 @@ export const api = {
             });
             if (!res.ok) throw new Error('Failed to create order');
             return res.json();
+        },
+
+        createPingpaySession: async (planId: string, amount: string) => {
+            // Call our backend, which proxies to Pingpay
+            const res = await fetch(`${API_URL}/billing/create-pingpay-session`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ planId, amount })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Failed to start Pingpay checkout');
+            }
+            return res.json();
         }
     },
 

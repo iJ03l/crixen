@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { api } from "@/services/api";
+import { PaymentModal } from "@/components/modals/PaymentModal";
 
 const PLANS = [
     {
@@ -52,29 +53,49 @@ const PLANS = [
     }
 ];
 
+const TIER_ORDER = ['starter', 'pro', 'agency'];
+
 export default function SettingsPage() {
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleUpgrade = async (plan: any) => {
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+    const handleUpgradeClick = (plan: any) => {
         if (!plan.itemId || !user) return;
         const currentTier = (user.tier as string) === 'free' ? 'starter' : user.tier;
-        if (plan.id === currentTier) return; // Already on plan
+        if (plan.id === currentTier) return;
 
+        setSelectedPlan(plan);
+        setIsPaymentModalOpen(true);
+    };
+
+    const handleHotPay = async () => {
+        if (!selectedPlan) return;
         setLoading(true);
         setError(null);
-
         try {
-            const data = await api.billing.createHotOrder(plan.itemId, plan.amount);
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                throw new Error("Failed to start checkout");
-            }
+            const data = await api.billing.createHotOrder(selectedPlan.itemId, selectedPlan.amount);
+            if (data.url) window.location.href = data.url;
+            else throw new Error("Failed to start Hot checkout");
         } catch (err: any) {
-            setError(err.message || "Something went wrong");
-        } finally {
+            setError(err.message || "Hot Pay failed");
+            setLoading(false);
+        }
+    };
+
+    const handlePingPay = async () => {
+        if (!selectedPlan) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await api.billing.createPingpaySession(selectedPlan.id, selectedPlan.amount);
+            if (data.url) window.location.href = data.url;
+            else throw new Error("Failed to start Pingpay checkout");
+        } catch (err: any) {
+            setError(err.message || "Pingpay failed");
             setLoading(false);
         }
     };
@@ -98,6 +119,10 @@ export default function SettingsPage() {
                 {PLANS.map((plan) => {
                     const currentTier = (user.tier as string) === 'free' ? 'starter' : user.tier;
                     const isCurrent = currentTier === plan.id;
+                    const currentTierIndex = TIER_ORDER.indexOf(currentTier);
+                    const planIndex = TIER_ORDER.indexOf(plan.id);
+                    const isDowngrade = planIndex < currentTierIndex;
+
                     return (
                         <div
                             key={plan.id}
@@ -124,18 +149,20 @@ export default function SettingsPage() {
                                 ))}
                             </ul>
 
-                            <button
-                                className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${isCurrent
-                                    ? 'bg-white/10 text-dark-muted cursor-default'
-                                    : 'bg-dark-text text-dark-bg hover:bg-dark-silver'
-                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                disabled={isCurrent || loading}
-                                onClick={() => handleUpgrade(plan)}
-                            >
-                                {loading && !isCurrent ? 'Processing...' : (
-                                    isCurrent ? "Current Plan" : (plan.itemId ? "Upgrade" : "Downgrade")
-                                )}
-                            </button>
+                            {!isDowngrade && (
+                                <button
+                                    className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${isCurrent
+                                        ? 'bg-white/10 text-dark-muted cursor-default'
+                                        : 'bg-dark-text text-dark-bg hover:bg-dark-silver'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    disabled={isCurrent || loading}
+                                    onClick={() => handleUpgradeClick(plan)}
+                                >
+                                    {loading && !isCurrent ? 'Processing...' : (
+                                        isCurrent ? "Current Plan" : "Upgrade"
+                                    )}
+                                </button>
+                            )}
                         </div>
                     );
                 })}
@@ -151,6 +178,15 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                plan={selectedPlan}
+                onHotPay={handleHotPay}
+                onPingPay={handlePingPay}
+                loading={loading}
+            />
+        </div >
     );
 }

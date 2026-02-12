@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Check, Sparkles } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +11,7 @@ const Pricing = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const [animatedValues, setAnimatedValues] = useState<number[]>([0, 0, 0]);
-  const { openAuthModal } = useAuthStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -190,7 +190,7 @@ const Pricing = () => {
               </ul>
 
               <button
-                onClick={() => openAuthModal('signup')}
+                onClick={() => navigate('/dashboard/settings')}
                 className={`w-full py-3 rounded-[14px] font-medium transition-all duration-200 ${plan.highlighted
                   ? 'btn-primary'
                   : 'btn-secondary'
