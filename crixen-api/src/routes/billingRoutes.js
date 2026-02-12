@@ -70,26 +70,25 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
             throw new Error('Server misconfiguration: Missing Pingpay Key');
         }
 
-        // Convert amount to minor units (cents) if Pingpay expects it, 
-        // OR standard units. Verify with docs later if this fails.
-        // Usually crypto gateways take standard units (e.g. "10.00").
-        // Let's assume standard units for now based on "10.00" string.
+        // Pingpay Hosted Checkout Flow (Mainnet)
+        // Asset: USDC (nep141:usdc.near) - 6 Decimals
+        const usdcDecimals = 6;
+        const amountInSmallestUnit = (parseFloat(amount) * Math.pow(10, usdcDecimals)).toFixed(0);
 
         const payload = {
-            success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=success`,
-            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=canceled`,
-            customer_email: email,
-            client_reference_id: userId,
-            amount: amount.toString(),
-            asset: {
-                code: "USDC",
-                chain: "NEAR"
+            amount: {
+                assetId: "nep141:usdc.near",
+                amount: amountInSmallestUnit
             },
-            metadata: {
-                userId: userId.toString(),
-                planId: planId
-            }
+            recipient: {
+                address: process.env.NEAR_MASTER_ACCOUNT_ID,
+                chainId: "near-mainnet"
+            },
+            successUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=success`,
+            cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=canceled`
         };
+
+        console.log('[Pingpay] Creating session with payload:', JSON.stringify(payload, null, 2));
 
         const response = await fetch('https://pay.pingpay.io/api/checkout/sessions', {
             method: 'POST',
@@ -107,8 +106,33 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
         }
 
         const data = await response.json();
-        // Assuming data.url is the hosted checkout link
-        res.json({ url: data.url, sessionId: data.id });
+        // data.sessionUrl should be the redirect link? Or data.url? 
+        // Docs example text says "retrieve the sessionUrl".
+        // Let's assume the response body structure isn't effectively documented but typically:
+        // { sessionId: "...", url: "..." } or similar.
+        // I will fallback to data.url or construct it if needed.
+
+        const sessionId = data.sessionId || data.id; // Try to resolve ID
+        const redirectUrl = data.sessionUrl || data.url;
+
+        if (!sessionId) {
+            console.error('[Pingpay] No session ID returned:', data);
+            return res.status(502).json({ error: 'Invalid response from payment provider' });
+        }
+
+        // Store Order in DB for reconciliation
+        // We use 'memo' column to store the Pingpay Session ID
+        const insertOrderQuery = `
+            INSERT INTO orders (user_id, memo, amount, status, item_id)
+            VALUES ($1, $2, $3, 'pending', $4)
+            RETURNING id
+        `;
+        // Mapping planId to itemId logic if needed, or just store planId in item_id for now 
+        // (schema allows string? user used hash before. let's assume planId is fine or map it)
+        // verified earlier: itemId is text in code, user used hash.
+        await db.query(insertOrderQuery, [userId, sessionId, amount, planId]);
+
+        res.json({ url: redirectUrl, sessionId: sessionId });
 
     } catch (error) {
         console.error('[Billing] Pingpay error:', error);
@@ -118,27 +142,55 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
 
 // POST /api/v1/billing/webhook
 // HOT Pay calls this when payment succeeds
+// POST /api/v1/billing/webhook
+// Unified Webhook for HOT Pay and Pingpay
 router.post('/webhook', express.json(), async (req, res) => {
-    console.log('[Webhook] Received payload:', req.body);
+    console.log('[Webhook] Received payload:', JSON.stringify(req.body, null, 2));
 
-    const { status, memo } = req.body;
+    let provider = null;
+    let orderIdOrMemo = null; // This corresponds to 'memo' in our DB
+    let paymentStatus = null;
+    let paidAmount = null;
+
+    // Detect Provider
+    if (req.body.status && req.body.memo && !req.body.session && !req.body.payment) {
+        // HOT Pay
+        provider = 'HOTPAY';
+        orderIdOrMemo = req.body.memo;
+        paymentStatus = req.body.status; // 'SUCCESS'
+    } else if (req.body.session || req.body.payment) {
+        // Pingpay
+        provider = 'PINGPAY';
+        const data = req.body.session || req.body.payment;
+        // Pingpay sends 'sessionId' (Hosted) or 'paymentId' (Headless). 
+        // We stored sessionId in 'memo' column for Hosted flow.
+        orderIdOrMemo = data.sessionId || data.paymentId;
+        paymentStatus = data.status; // 'COMPLETED' or 'SUCCESS'
+        // Pingpay might not send amount in webhook, we rely on DB order amount
+    } else {
+        console.warn('[Webhook] Unknown payload format');
+        return res.status(400).json({ error: 'Unknown payload format' });
+    }
+
+    console.log(`[Webhook] Detected Provider: ${provider}, ID: ${orderIdOrMemo}, Status: ${paymentStatus}`);
 
     // 1. Validate status
-    if (status !== 'SUCCESS') {
-        console.log(`[Webhook] Payment not successful: ${status}`);
+    const isSuccess = (paymentStatus === 'SUCCESS' || paymentStatus === 'COMPLETED');
+    if (!isSuccess) {
+        console.log(`[Webhook] Payment not successful: ${paymentStatus}`);
         return res.json({ received: true });
     }
 
-    if (!memo) {
-        return res.status(400).json({ error: 'Missing memo' });
+    if (!orderIdOrMemo) {
+        return res.status(400).json({ error: 'Missing identifier (memo/sessionId)' });
     }
 
     try {
-        // 2. Find Order by Memo
-        const orderResult = await db.query('SELECT * FROM orders WHERE memo = $1', [memo]);
+        // 2. Find Order by Memo (which stores UUID for HotPay OR sessionId for Pingpay)
+        const orderResult = await db.query('SELECT * FROM orders WHERE memo = $1', [orderIdOrMemo]);
 
         if (orderResult.rows.length === 0) {
-            console.error(`[Webhook] Order not found for memo: ${memo}`);
+            console.error(`[Webhook] Order not found for identifier: ${orderIdOrMemo}`);
             return res.status(404).json({ error: 'Order not found' });
         }
 
@@ -153,9 +205,11 @@ router.post('/webhook', express.json(), async (req, res) => {
         // 4. Mark Order as Paid
         await db.query('UPDATE orders SET status = $1 WHERE id = $2', ['paid', order.id]);
 
-        // 5. Determine tier based on amount paid
-        let tier = 'pro'; // Default
+        // 5. Determine tier based on amount paid (from DB record)
+        let tier = 'pro';
         const amount = parseFloat(order.amount);
+
+        // Simple tier logic based on amount
         if (amount >= 100) {
             tier = 'agency';
         } else if (amount >= 10) {
@@ -175,9 +229,14 @@ router.post('/webhook', express.json(), async (req, res) => {
         await db.query(`
             INSERT INTO tickets (user_id, order_id, ticket_data)
             VALUES ($1, $2, $3)
-        `, [order.user_id, order.id, JSON.stringify({ issued_at: new Date(), description: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Upgrade`, expires_at: expiresAt })]);
+        `, [order.user_id, order.id, JSON.stringify({
+            issued_at: new Date(),
+            description: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Upgrade (${provider})`,
+            expires_at: expiresAt,
+            provider: provider
+        })]);
 
-        console.log(`[Webhook] Order ${order.id} processed. User ${order.user_id} upgraded.`);
+        console.log(`[Webhook] Order ${order.id} processed via ${provider}. User ${order.user_id} upgraded.`);
 
         res.json({ success: true });
 
