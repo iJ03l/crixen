@@ -76,9 +76,9 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
         const amountInSmallestUnit = (parseFloat(amount) * Math.pow(10, usdcDecimals)).toFixed(0);
 
         const payload = {
-            amount: {
-                assetId: "nep141:usdc.near",
-                amount: amountInSmallestUnit
+            amount: amountInSmallestUnit,
+            asset: {
+                assetId: "nep141:usdc.near"
             },
             recipient: {
                 address: process.env.NEAR_MASTER_ACCOUNT_ID,

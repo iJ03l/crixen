@@ -59,8 +59,8 @@ export function PaymentModal({ isOpen, onClose, plan, onHotPay, onPingPay, loadi
                             <Wallet size={24} />
                         </div>
                         <div>
-                            <div className="font-bold text-white">Crypto / Hot Wallet</div>
-                            <div className="text-xs text-white/50">Pay with USDC/USDT on any chain</div>
+                            <div className="font-bold text-white">HOT Pay</div>
+                            <div className="text-xs text-white/50">Pay with any token on any chain</div>
                         </div>
                     </button>
                 </div>
