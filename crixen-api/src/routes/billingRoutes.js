@@ -51,6 +51,73 @@ router.post('/create-hot-order', requireAuth, async (req, res) => {
         console.error('Error creating HOT order:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+
+});
+
+// POST /api/v1/billing/create-pingpay-session
+router.post('/create-pingpay-session', requireAuth, async (req, res) => {
+    const { planId, amount } = req.body;
+    const userId = req.user?.id;
+    const email = req.user?.email || 'customer@example.com';
+
+    if (!userId || !planId || !amount) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+        const pingpayKey = process.env.PINGPAY_PUBLISHABLE_KEY;
+        if (!pingpayKey) {
+            throw new Error('Server misconfiguration: Missing Pingpay Key');
+        }
+
+        // Convert amount to minor units (cents) if Pingpay expects it, 
+        // OR standard units. Verify with docs later if this fails.
+        // Usually crypto gateways take standard units (e.g. "10.00").
+        // Let's assume standard units for now based on "10.00" string.
+
+        const payload = {
+            success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=success`,
+            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=canceled`,
+            customer_email: email,
+            client_reference_id: userId, // Pass userId to track who paid
+            line_items: [
+                {
+                    name: `Crixen ${planId} Upgrade`,
+                    description: `Monthly subscription for Crixen ${planId} plan`,
+                    amount: parseFloat(amount), // Assuming Pingpay handles float amount in USD
+                    currency: "USD",
+                    quantity: 1
+                }
+            ],
+            metadata: {
+                userId: userId.toString(),
+                planId: planId
+            }
+        };
+
+        const response = await fetch('https://pay.pingpay.io/api/checkout/sessions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-publishable-key': pingpayKey
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('[Pingpay] Session creation failed:', response.status, errText);
+            return res.status(400).json({ message: 'Pingpay provider error', details: errText });
+        }
+
+        const data = await response.json();
+        // Assuming data.url is the hosted checkout link
+        res.json({ url: data.url, sessionId: data.id });
+
+    } catch (error) {
+        console.error('[Billing] Pingpay error:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 });
 
 // POST /api/v1/billing/webhook

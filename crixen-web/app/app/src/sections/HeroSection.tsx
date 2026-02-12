@@ -159,13 +159,15 @@ const HeroSection = () => {
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mt-6 lg:mt-8">
-                <button
-                  onClick={() => navigate('/changelog')}
+                <a
+                  href="https://chromewebstore.google.com/detail/crixen/oapmeeppjjmmchhbbdighfimhkifdmgj?hl=en-US&utm_source=ext_sidebar"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn-primary flex items-center gap-2"
                 >
                   <Sparkles size={18} />
                   Install Extension
-                </button>
+                </a>
                 <button className="btn-secondary flex items-center gap-2">
                   <Play size={18} />
                   Watch demo
