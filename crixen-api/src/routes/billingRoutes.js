@@ -79,16 +79,12 @@ router.post('/create-pingpay-session', requireAuth, async (req, res) => {
             success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=success`,
             cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings?payment=canceled`,
             customer_email: email,
-            client_reference_id: userId, // Pass userId to track who paid
-            line_items: [
-                {
-                    name: `Crixen ${planId} Upgrade`,
-                    description: `Monthly subscription for Crixen ${planId} plan`,
-                    amount: parseFloat(amount), // Assuming Pingpay handles float amount in USD
-                    currency: "USD",
-                    quantity: 1
-                }
-            ],
+            client_reference_id: userId,
+            amount: amount.toString(),
+            asset: {
+                code: "USDC",
+                chain: "NEAR"
+            },
             metadata: {
                 userId: userId.toString(),
                 planId: planId
