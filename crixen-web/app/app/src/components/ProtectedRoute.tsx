@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
@@ -8,23 +8,34 @@ interface ProtectedRouteProps {
 
 /**
  * ProtectedRoute component
- * If user is not authenticated, opens the auth modal and shows the landing page.
- * After successful login, the user will be redirected to dashboard via AuthModal's navigate.
+ * Validates session on mount. If token is expired or invalid,
+ * the user is logged out and redirected to the landing page with the auth modal.
  */
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const { user, openAuthModal } = useAuthStore();
+    const { user, openAuthModal, validateSession } = useAuthStore();
     const location = useLocation();
+    const [isValidating, setIsValidating] = useState(true);
 
     useEffect(() => {
-        if (!user) {
-            // Open auth modal when user tries to access protected route
+        const check = async () => {
+            await validateSession();
+            setIsValidating(false);
+        };
+        check();
+    }, [validateSession]);
+
+    useEffect(() => {
+        if (!isValidating && !user) {
             openAuthModal('login');
         }
-    }, [user, openAuthModal]);
+    }, [isValidating, user, openAuthModal]);
+
+    // Still validating — show nothing to prevent flash
+    if (isValidating) {
+        return null;
+    }
 
     if (!user) {
-        // Redirect to landing page while modal is open
-        // Store intended destination for potential future use
         return <Navigate to="/" state={{ from: location }} replace />;
     }
 
@@ -32,3 +43,4 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 };
 
 export default ProtectedRoute;
+

@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navigation from '../sections/Navigation';
 import HeroSection from '../sections/HeroSection';
+import LogoStrip from '../sections/LogoStrip';
 import CombinedFeatureSection from '../sections/CombinedFeatureSection';
 import DashboardPreview from '../sections/DashboardPreview';
 import HowItWorks from '../sections/HowItWorks';
@@ -42,6 +43,11 @@ export default function LandingPage() {
                 {/* Section 1: Hero - z-10 */}
                 <div className="relative z-10">
                     <HeroSection />
+                </div>
+
+                {/* Logo Strip - inset between hero and features */}
+                <div className="relative z-[15]">
+                    <LogoStrip />
                 </div>
 
                 {/* Merged Section: Secure, Tone & Dashboard - z-20 */}

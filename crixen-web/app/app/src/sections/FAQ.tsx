@@ -98,7 +98,7 @@ const FAQ = () => {
       ref={sectionRef}
       className="relative bg-dark-bg py-20 lg:py-32"
     >
-      <div className="w-[70vw] max-w-[780px] mx-auto">
+      <div className="w-[90vw] sm:w-[80vw] lg:w-[70vw] max-w-[780px] mx-auto">
         <h2
           ref={titleRef}
           className="font-heading font-bold text-3xl lg:text-[clamp(34px,3.6vw,52px)] text-dark-text text-center mb-12 lg:mb-16"

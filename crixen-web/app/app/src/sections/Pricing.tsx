@@ -148,7 +148,7 @@ const Pricing = () => {
             <div
               key={i}
               className={`pricing-card relative p-6 lg:p-7 rounded-[22px] border transition-all duration-300 ${plan.highlighted
-                ? 'bg-white/[0.05] border-white/[0.14] shadow-glow scale-105 z-10'
+                ? 'bg-white/[0.05] border-white/[0.14] shadow-glow md:scale-105 z-10'
                 : 'bg-dark-card border-white/[0.06] hover:-translate-y-1'
                 }`}
             >

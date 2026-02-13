@@ -17,7 +17,6 @@ const AuthModal = () => {
     flow: 'auth-code',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
@@ -52,7 +51,7 @@ const AuthModal = () => {
 
     let success = false;
     if (authMode === 'login') {
-      success = await login(formData.email, formData.password, rememberMe);
+      success = await login(formData.email, formData.password);
     } else if (authMode === 'signup') {
       success = await signup(formData.email, formData.password);
     } else if (authMode === 'forgot-password') {
@@ -176,16 +175,7 @@ const AuthModal = () => {
           )}
 
           {isLogin && (
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-white/[0.15] bg-white/[0.05] text-dark-silver focus:ring-dark-silver/30"
-                />
-                <span className="text-sm text-dark-muted">Remember me</span>
-              </label>
+            <div className="flex items-center justify-end">
               <button
                 type="button"
                 onClick={() => { setForgotPasswordSuccess(false); setAuthMode('forgot-password'); }}

@@ -13,11 +13,16 @@ import {
 } from 'lucide-react';
 
 export default function DashboardLayout() {
-    const { user, logout } = useAuthStore();
+    const { user, logout, validateSession } = useAuthStore();
     const { isExtensionInstalled, syncAuthToExtension, clearExtensionAuth } = useExtensionAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Validate session on dashboard mount
+    useEffect(() => {
+        validateSession();
+    }, [validateSession]);
 
     // Sync auth on mount if extension is present
     useEffect(() => {

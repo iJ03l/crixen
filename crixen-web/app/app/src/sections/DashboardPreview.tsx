@@ -209,7 +209,7 @@ const DashboardPreview = () => {
               </h2>
 
               {/* Stats */}
-              <div ref={statsRef} className="grid grid-cols-3 gap-3 lg:gap-4 mb-6">
+              <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-6">
                 {stats.map((stat, i) => (
                   <div
                     key={i}
@@ -235,7 +235,7 @@ const DashboardPreview = () => {
 
               {/* Recent Replies Table */}
               <div className="rounded-xl bg-white/[0.03] border border-white/[0.05] overflow-hidden">
-                <div className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.05] text-xs font-mono text-dark-muted uppercase tracking-wider">
+                <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.05] text-xs font-mono text-dark-muted uppercase tracking-wider">
                   <div className="col-span-2 hidden lg:block">Platform</div>
                   <div className="col-span-3 lg:col-span-2">User</div>
                   <div className="col-span-4 lg:col-span-3">Comment</div>
@@ -245,38 +245,57 @@ const DashboardPreview = () => {
                 {recentReplies.map((reply, i) => (
                   <div
                     key={i}
-                    className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.03] items-center hover:bg-white/[0.02] transition-colors"
+                    className="px-4 py-3 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
                   >
-                    <div className="col-span-2 hidden lg:flex items-center gap-2">
-                      <reply.icon size={16} className="text-dark-muted" />
-                      <span className="text-sm text-dark-muted">
-                        {reply.platform}
-                      </span>
+                    {/* Mobile: stacked layout */}
+                    <div className="sm:hidden flex items-start gap-3">
+                      <reply.icon size={16} className="text-dark-muted mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-dark-text">{reply.user}</span>
+                          {reply.status === 'sent' ? (
+                            <Check size={14} className="text-green-400" />
+                          ) : (
+                            <MoreHorizontal size={14} className="text-dark-muted" />
+                          )}
+                        </div>
+                        <p className="text-xs text-dark-muted truncate">{reply.comment}</p>
+                        <p className="text-xs text-dark-text truncate mt-0.5">{reply.reply}</p>
+                      </div>
                     </div>
-                    <div className="col-span-3 lg:col-span-2">
-                      <span className="text-sm text-dark-text">
-                        {reply.user}
-                      </span>
-                    </div>
-                    <div className="col-span-4 lg:col-span-3">
-                      <span className="text-sm text-dark-muted truncate block">
-                        {reply.comment}
-                      </span>
-                    </div>
-                    <div className="col-span-4 lg:col-span-4">
-                      <span className="text-sm text-dark-text truncate block">
-                        {reply.reply}
-                      </span>
-                    </div>
-                    <div className="col-span-1 text-right">
-                      {reply.status === 'sent' ? (
-                        <Check size={16} className="text-green-400 inline" />
-                      ) : (
-                        <MoreHorizontal
-                          size={16}
-                          className="text-dark-muted inline"
-                        />
-                      )}
+                    {/* Desktop: grid layout */}
+                    <div className="hidden sm:grid grid-cols-12 gap-2 items-center">
+                      <div className="col-span-2 hidden lg:flex items-center gap-2">
+                        <reply.icon size={16} className="text-dark-muted" />
+                        <span className="text-sm text-dark-muted">
+                          {reply.platform}
+                        </span>
+                      </div>
+                      <div className="col-span-3 lg:col-span-2">
+                        <span className="text-sm text-dark-text">
+                          {reply.user}
+                        </span>
+                      </div>
+                      <div className="col-span-4 lg:col-span-3">
+                        <span className="text-sm text-dark-muted truncate block">
+                          {reply.comment}
+                        </span>
+                      </div>
+                      <div className="col-span-4 lg:col-span-4">
+                        <span className="text-sm text-dark-text truncate block">
+                          {reply.reply}
+                        </span>
+                      </div>
+                      <div className="col-span-1 text-right">
+                        {reply.status === 'sent' ? (
+                          <Check size={16} className="text-green-400 inline" />
+                        ) : (
+                          <MoreHorizontal
+                            size={16}
+                            className="text-dark-muted inline"
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -110,7 +110,7 @@ router.post('/login', async (req, res) => {
 
         // If user has no password (social login only), prevent password login
         if (!user.password_hash) {
-            return res.status(401).json({ error: 'Please log in with Google/GitHub' });
+            return res.status(401).json({ error: 'Please log in with Google' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password_hash);
