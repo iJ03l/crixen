@@ -2,7 +2,7 @@
 
 **The Ultimate Social Media AI Agent.**
 
-Crixen is a centralized SaaS ecosystem designed to scale with your brand. It consists of a web dashboard for strategy management and a browser extension for on-platform execution.
+Crixen is a SaaS ecosystem designed to scale with your brand. It consists of a web dashboard for strategy management and a browser extension for on-platform execution. Everything is managed from [www.crixen.xyz](https://www.crixen.xyz).
 
 ---
 
@@ -17,7 +17,7 @@ The project is divided into three interconnected components:
 *   **Key Features**:
     *   **Secure AI Proxy**: Routes requests to NEAR AI using system-level API keys.
     *   **Centralized Auth**: JWT-based authentication synced across web and extension.
-    *   **NOVA Integration**: Zero-knowledge encrypted storage with invisible NEAR account creation.
+    *   **NOVA Integration**: Zero-knowledge encrypted storage with invisible NEAR account interaction.
 
 ### 2. Crixen Dashboard (`/crixen-web`)
 **The Command Center.**
@@ -31,6 +31,7 @@ The project is divided into three interconnected components:
 ### 3. Crixen Extension (`/crixen-extension`)
 **The Agent in the Field.**
 *   **Tech**: Chrome Extension (Manifest V3), Vanilla JS.
+*   **Install**: [Available on Chrome Web Store](https://chromewebstore.google.com/detail/crixen/oapmeeppjjmmchhbbdighfimhkifdmgj)
 *   **Role**: Overlays AI assistance onto social platforms (Instagram, X/Twitter, Notion).
 *   **Key Features**:
     *   **Zero-Config Auth**: Automatically syncs login state from the Dashboard.
@@ -56,7 +57,7 @@ Secure, zero-knowledge storage for sensitive brand strategies.
 ### Tiered SaaS Model
 | Tier | Projects | Strategies/Project | NOVA Storage |
 |------|----------|-------------------|--------------|
-| **Starter (Free)** | 1 | 3 | Encrypted |
+| **Starter (Free)** | 1 | 3 | **Encrypted (NOVA)** |
 | **Pro ($10/mo)** | 3 | 10 | Encrypted |
 | **Agency ($100/mo)** | Unlimited | Unlimited | Encrypted |
 
@@ -89,9 +90,8 @@ pnpm dev
 
 ### 3. Load the Extension
 1.  **Install**:
-    *   Open Chrome -> `chrome://extensions`
-    *   Enable "Developer Mode"
-    *   "Load Unpacked" -> Select `/crixen-extension` folder.
+    *   **Official**: [Install from Chrome Web Store](https://chromewebstore.google.com/detail/crixen/oapmeeppjjmmchhbbdighfimhkifdmgj)
+    *   **Dev Mode**: Open Chrome -> `chrome://extensions` -> Enable "Developer Mode" -> "Load Unpacked" -> Select `/crixen-extension` folder.
 2.  **Sync**:
     *   Log in to the Dashboard (`http://localhost:5173` or `https://crixen.xyz`).
     *   Open the extension popup and click **Sign in via Dashboard**.

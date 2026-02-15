@@ -89,6 +89,7 @@ const Pricing = () => {
         '1 Project / Memory Context',
         'Basic generation limits',
         'Standard tone settings',
+        'Nova Encrypted Storage',
         'Community support',
       ],
       cta: 'Get started',
