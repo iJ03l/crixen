@@ -4,6 +4,8 @@
 
 Crixen is a SaaS ecosystem designed to scale with your brand. It consists of a web dashboard for strategy management and a browser extension for on-platform execution. Everything is managed from [www.crixen.xyz](https://www.crixen.xyz).
 
+With integrated AI personal assistants for Notion and social platforms, Crixen automates content calendars, brand strategies, reports, and engagement.
+
 ---
 
 ## System Architecture
@@ -32,8 +34,11 @@ The project is divided into three interconnected components:
 **The Agent in the Field.**
 *   **Tech**: Chrome Extension (Manifest V3), Vanilla JS.
 *   **Install**: [Available on Chrome Web Store](https://chromewebstore.google.com/detail/crixen/oapmeeppjjmmchhbbdighfimhkifdmgj)
-*   **Role**: Overlays AI assistance onto social platforms (Instagram, X/Twitter, Notion).
+*   **Role**: Overlays AI assistance onto social platforms.
 *   **Key Features**:
+    *   **X (Twitter)**: AI-powered Posts, Replies, and Quote tweets directly on the platform.
+    *   **Instagram**: Automate campaign engagement and sensitization comments.
+    *   **Notion**: Personal Assistant to generate content calendars, brand strategies, and detailed reports.
     *   **Zero-Config Auth**: Automatically syncs login state from the Dashboard.
     *   **Notion Capture**: Scrape strategies from Notion tables and sync to cloud.
     *   **Local Execution**: Runs fast by caching strategy locally.
@@ -48,11 +53,11 @@ No more copying API keys.
 2.  Open the **Extension**.
 3.  It automatically detects your session and logs you in.
 
-### NOVA Encrypted Storage (Active on Mainnet)
-Secure, zero-knowledge storage for sensitive brand strategies.
-*   **Architecture**: Strategies & Brand Voices are encrypted client-side (server acts as client) and uploaded to **IPFS** via **NOVA SDK**.
-*   **Database Masking**: The SQL database **NEVER** stores plain text strategies. It stores masked placeholders (e.g., `**SECURED ON NOVA**`) while real data lives on IPFS.
-*   **Platform-Managed Security**: Uses the platform's NEAR Mainnet account (`ij03l.nova-sdk.near`) to authorize secure uploads, removing the need for users to manage wallets.
+### Seamless Integration & Payments
+We abstract the complexity of Web3 and AI infrastructure:
+*   **PingPay & HotPay**: Integrated payment flows that make the platform seamless. Users don't need to manage NEAR AI API keys or handle gas fees for NOVA privacy features manually.
+*   **NOVA Encrypted Storage**: Zero-knowledge storage for sensitive strategies, ensuring privacy without technical friction.
+*   **No Wallet Management**: The platform handles the underlying NEAR account interaction (`ij03l.nova-sdk.near`) so you can focus on your brand.
 
 ### Tiered SaaS Model
 | Tier | Projects | Strategies/Project | NOVA Storage |
@@ -122,5 +127,12 @@ To change this for local development:
 
 ---
 
-**Version**: 2.1.0
-**License**: Proprietary
+## Contributing
+Crixen is now Open Source! We welcome contributions from everyone. Whether it's adding new platform integrations, refining AI models, or improving the dashboard UI, feel free to fork the repo and submit a PR. 
+
+More integrations are coming soon!
+
+---
+
+**Version**: 2.2.0
+**License**: MIT (Open Source)
