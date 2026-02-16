@@ -1,10 +1,45 @@
-# Crixen SaaS Platform
+<div align="center">
+  <img src="crixen-web/app/app/public/logo.png" alt="Crixen Logo" width="200"/>
+  <br/>
+  <img src="https://readme-typing-svg.herokuapp.com?font=Space+Grotesk&weight=700&size=40&pause=1000&color=F7F7F7&center=true&vCenter=true&width=500&lines=Crixen+Ai" alt="Crixen Ai" />
+  <br/>
+  <a href="https://github.com/iJ03l/crixen/stargazers"><img src="https://img.shields.io/github/stars/iJ03l/crixen?style=flat&logo=github&color=black&labelColor=gray" alt="Stars"/></a>
+  <a href="https://github.com/iJ03l/crixen/network/members"><img src="https://img.shields.io/github/forks/iJ03l/crixen?style=flat&logo=github&color=black&labelColor=gray" alt="Forks"/></a>
+  <a href="https://github.com/iJ03l/crixen/issues"><img src="https://img.shields.io/github/issues/iJ03l/crixen?style=flat&logo=github&color=black&labelColor=gray" alt="Issues"/></a>
+  <img src="https://img.shields.io/github/languages/top/iJ03l/crixen?style=flat&color=black&labelColor=gray" alt="Top Language"/>
+  <br/>
+</div>
+
 
 **The Ultimate Social Media AI Agent.**
 
-Crixen is a SaaS ecosystem designed to scale with your brand. It consists of a web dashboard for strategy management and a browser extension for on-platform execution. Everything is managed from [www.crixen.xyz](https://www.crixen.xyz).
+Crixen is the co-founder that never sleeps. It is an intelligent autopilot for your browser, designed to keep your brand alive and growing even when you're deep in development.
 
-With integrated AI personal assistants for Notion and social platforms, Crixen automates content calendars, brand strategies, reports, and engagement.
+Everything is managed from [www.crixen.xyz](https://www.crixen.xyz).
+
+---
+
+## Inspiration (The "Why")
+
+As a solo founder, I faced a dilemma: build the product or build the community. I couldn't do both effectively 24/7. I needed a clone—someone to engage with users, write posts, and execute marketing strategies while I focused on code.
+
+I built Crixen to be that solution. It is designed to engage with users, write posts, and execute marketing strategies while you focus on code.
+
+## What it Does
+
+Crixen doesn't just run blindly; it empowers you with 1-click execution, keeping you in control while automating the heavy lifting.
+
+*   **Smart Engagement**: It drafts context-aware, human-like replies to posts and comments on X (Twitter) and Instagram. You simply review and click to send.
+*   **Strategic Planning**: Generates full content calendars and brand strategies on your Notion notes.
+*   **Assisted Execution**: It manages your brand's voice and growth, allowing you to approve high-quality interactions in seconds rather than minutes typing.
+
+## How We Built It (Tech Stack)
+
+We leveraged the full NEAR Ecosystem to build a secure, private, and powerful agent:
+
+*   **Near AI**: The "brain" of the agent. It processes context for social platforms and generates high-quality, on-brand content and replies.
+*   **Nova-SDK**: The "vault". We use Nova's zero-knowledge encryption to store sensitive brand strategies and user data, ensuring that even we cannot access a user's private strategy.
+*   **Hotpay & Pingpay**: The "paywall". We integrated Hotpay and Pingpay to handle seamless crypto subscriptions and payments, allowing users to pay for the service with their preferred tokens and not have to think of LLMS api key and gas fees for NOVA-pinata group fees.
 
 ---
 
@@ -40,7 +75,7 @@ The project is divided into three interconnected components:
     *   **Instagram**: Automate campaign engagement and sensitization comments.
     *   **Notion**: Personal Assistant to generate content calendars, brand strategies, and detailed reports.
     *   **Zero-Config Auth**: Automatically syncs login state from the Dashboard.
-    *   **Notion Capture**: Scrape strategies from Notion tables and sync to cloud.
+    *   **Notion Capture**: Scrape strategies from Notion tables and sync to your dashboard.
     *   **Local Execution**: Runs fast by caching strategy locally.
 
 ---
@@ -74,7 +109,7 @@ We abstract the complexity of Web3 and AI infrastructure:
 *   Node.js (v20+) & pnpm
 *   PostgreSQL Database
 *   NEAR AI API Key (System Level)
-*   NEAR Master Account (for NOVA - optional)
+*   NEAR Master Account (for NOVA)
 
 ### 1. Start the API
 ```bash
