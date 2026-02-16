@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="crixen-web/app/app/public/logo.png" alt="Crixen Logo" width="200"/>
+  <img src="crixen-web/app/app/public/logo.png" alt="Crixen Logo" width="50"/>
   <br/>
   <img src="https://readme-typing-svg.herokuapp.com?font=Space+Grotesk&weight=700&size=40&pause=1000&color=F7F7F7&center=true&vCenter=true&width=500&lines=Crixen+Ai" alt="Crixen Ai" />
   <br/>
