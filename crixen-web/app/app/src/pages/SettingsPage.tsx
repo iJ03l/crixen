@@ -48,7 +48,7 @@ const PLANS = [
             "Team collaboration",
             "Dedicated account manager"
         ],
-        itemId: "2b92641315835c432360ebc220cac4b901614764b85ce81dfbe1688688461749", // SHA256('agency_tier')
+        itemId: "ecbeffd41e7a3619a140093cc011e6bc384970f96e69502d8f50cf95c248f7c5", // SHA256('agency_tier')
         amount: "100.00"
     }
 ];

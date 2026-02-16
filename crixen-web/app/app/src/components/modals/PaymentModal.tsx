@@ -58,7 +58,7 @@ export function PaymentModal({ isOpen, onClose, plan, onHotPay, onPingPay, loadi
                         onClick={handlePingClick}
                         disabled={loading}
                         className={`w-full group relative flex items-center gap-4 p-4 rounded-xl border transition-all text-left ${loading && processingMethod !== 'ping' ? 'opacity-50 cursor-not-allowed border-white/5 bg-white/[0.01]' :
-                                'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/20'
+                            'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/20'
                             }`}
                     >
                         <div className="p-3 rounded-lg bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
@@ -66,9 +66,9 @@ export function PaymentModal({ isOpen, onClose, plan, onHotPay, onPingPay, loadi
                         </div>
                         <div>
                             <div className="font-bold text-white">
-                                {loading && processingMethod === 'ping' ? 'Redirecting...' : 'Crypto (Pingpay)'}
+                                {loading && processingMethod === 'ping' ? 'Redirecting...' : 'PingPay (Crypto)'}
                             </div>
-                            <div className="text-xs text-white/50">Fast crypto checkout via Pingpay</div>
+                            <div className="text-xs text-white/50">Pay with any method on any chain</div>
                         </div>
                     </button>
 
@@ -77,7 +77,7 @@ export function PaymentModal({ isOpen, onClose, plan, onHotPay, onPingPay, loadi
                         onClick={handleHotClick}
                         disabled={loading}
                         className={`w-full group relative flex items-center gap-4 p-4 rounded-xl border transition-all text-left ${loading && processingMethod !== 'hot' ? 'opacity-50 cursor-not-allowed border-white/5 bg-white/[0.01]' :
-                                'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/20'
+                            'border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/20'
                             }`}
                     >
                         <div className="p-3 rounded-lg bg-orange-500/20 text-orange-400 group-hover:scale-110 transition-transform">
@@ -85,9 +85,9 @@ export function PaymentModal({ isOpen, onClose, plan, onHotPay, onPingPay, loadi
                         </div>
                         <div>
                             <div className="font-bold text-white">
-                                {loading && processingMethod === 'hot' ? 'Processing...' : 'HOT Pay'}
+                                {loading && processingMethod === 'hot' ? 'Processing...' : 'HOT Pay (Crypto)'}
                             </div>
-                            <div className="text-xs text-white/50">Pay with any token on any chain</div>
+                            <div className="text-xs text-white/50">Pay with any wallet on any chain</div>
                         </div>
                     </button>
                 </div>

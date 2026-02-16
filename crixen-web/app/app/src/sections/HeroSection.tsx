@@ -1,8 +1,9 @@
-import { useEffect, useRef, useLayoutEffect } from 'react';
+import { useEffect, useRef, useLayoutEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Play, Sparkles } from 'lucide-react';
+import { VideoModal } from '../components/modals/VideoModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,6 +14,8 @@ const HeroSection = () => {
   const bgRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   // const navigate = useNavigate();
+
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   // Load animation (on mount)
   useEffect(() => {
@@ -168,7 +171,10 @@ const HeroSection = () => {
                   <Sparkles size={18} />
                   Install Extension
                 </a>
-                <button className="btn-secondary flex items-center gap-2">
+                <button
+                  onClick={() => setIsVideoOpen(true)}
+                  className="btn-secondary flex items-center gap-2"
+                >
                   <Play size={18} />
                   Watch demo
                 </button>
@@ -254,6 +260,12 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <VideoModal
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+        videoId="tVCEIE6F18k"
+      />
     </section>
   );
 };
